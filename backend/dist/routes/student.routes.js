@@ -1,0 +1,20 @@
+import { Router } from "express";
+import { getProfile, updateProfile, getPortfolio, addOrUpdateSkill, deleteSkill, addCertification, deleteCertification, addProject, deleteProject, addInternship, deleteInternship, submitAssessment, getSkillGaps, } from "../controllers/student.controller";
+import { authenticateToken, authorizeRoles } from "../middleware/auth.middleware";
+const router = Router();
+// Protect all student routes with JWT authentication
+router.use(authenticateToken);
+router.get("/profile", getProfile);
+router.put("/profile", authorizeRoles("Student"), updateProfile);
+router.get("/portfolio", getPortfolio);
+router.post("/skills", authorizeRoles("Student"), addOrUpdateSkill);
+router.delete("/skills/:skillId", authorizeRoles("Student"), deleteSkill);
+router.post("/certifications", authorizeRoles("Student"), addCertification);
+router.delete("/certifications/:id", authorizeRoles("Student"), deleteCertification);
+router.post("/projects", authorizeRoles("Student"), addProject);
+router.delete("/projects/:id", authorizeRoles("Student"), deleteProject);
+router.post("/internships", authorizeRoles("Student"), addInternship);
+router.delete("/internships/:id", authorizeRoles("Student"), deleteInternship);
+router.post("/assessments", authorizeRoles("Student"), submitAssessment);
+router.get("/skill-gaps", getSkillGaps);
+export default router;

@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
+import { requireAdmin } from "../middlewares/admin.middleware.js";
+import { getIndustries, getIndustryById, approveIndustry, rejectIndustry, } from "../controllers/admin.controller.js";
+const router = Router();
+router.get("/industries", authenticateToken, requireAdmin, getIndustries);
+router.get("/industries/:id", authenticateToken, requireAdmin, getIndustryById);
+router.put("/industries/:id/approve", authenticateToken, requireAdmin, approveIndustry);
+router.put("/industries/:id/reject", authenticateToken, requireAdmin, rejectIndustry);
+export default router;
