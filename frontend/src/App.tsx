@@ -14,6 +14,9 @@ import StudentApplicationsPage from "./pages/student/StudentApplications";
 import IndustryDemandReport from "./pages/student/IndustryDemandReport";
 import CompaniesPage from "./pages/student/CompaniesPage";
 import SkillGapAnalysisPage from "./pages/student/SkillGapAnalysis";
+import SavedOpportunities from "./pages/student/SavedOpportunities";
+import LearningHub from "./pages/student/LearningHub";
+import ExperiencesPage from "./pages/student/ExperiencesPage";
 import ComingSoonPage from "./pages/ComingSoon";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import InstitutionDashboard from "./pages/institution/InstitutionDashboard";
@@ -216,6 +219,44 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SkillGapAnalysisPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Student Saved Opportunities Route */}
+            <Route
+              path="/student/saved"
+              element={
+                <ProtectedRoute>
+                  <SavedOpportunities />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Student Learning Hub Route */}
+            <Route
+              path="/student/learning"
+              element={
+                <ProtectedRoute>
+                  <LearningHub />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Student Experiences Route */}
+            <Route
+              path="/student/experiences"
+              element={
+                <ProtectedRoute>
+                  <ExperiencesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/experiences"
+              element={
+                <ProtectedRoute>
+                  <ExperiencesPage />
                 </ProtectedRoute>
               }
             />

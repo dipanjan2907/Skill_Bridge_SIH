@@ -1,104 +1,201 @@
-
 @import "tailwindcss";
 
 :root,
 :root[data-theme="dark"] {
-  --bg-app: #0b1120;
-  --bg-card: rgba(18, 26, 44, 0.75);
-  --bg-card-hover: rgba(30, 41, 65, 0.85);
-  --bg-sidebar: #080d1a;
-  --bg-topbar: rgba(11, 17, 32, 0.88);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-color-hover: rgba(255, 255, 255, 0.18);
+  /* =========================================================
+     SKILLBRIDGE — EXECUTIVE OBSIDIAN & ELECTRIC TEAL/CYAN
+     High-contrast Dark Slate + Sky Cyan Primary + Emerald/Amber/Rose Accents
+     (Strictly Non-Purplish, Modern Tech & Academia Visual Palette)
+     ========================================================= */
+
+  /* ── Page & Surface Hierarchy ── */
+  --bg-app: #0b0f19;
+  --bg-sidebar: #111827;
+  --bg-topbar: #111827;
+
+  --bg-card: #172033;
+  --bg-card-hover: #1e293b;
+  --bg-elevated: #1e293b;
+
+  /* ── Borders ── */
+  --border-color: #26354f;
+  --border-color-hover: #3b5075;
+  --border-subtle: #1c283f;
+
+  /* ── Typography ── */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-dark: #4f46e5;
-  --primary-glow: rgba(99, 102, 241, 0.28);
-  --accent-cyan: #06b6d4;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-pink: #ec4899;
-  --accent-purple: #a855f7;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px 0 rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.35);
+
+  /* ── Primary Accent: Electric Sky Cyan ── */
+  --primary: #1168b9f3;
+  --primary-light: #1088cc;
+  --primary-dark: #0c618b;
+
+  --primary-subtle: rgba(14, 165, 233, 0.12);
+  --primary-border: rgba(56, 189, 248, 0.3);
+  --primary-glow: rgba(14, 165, 233, 0.18);
+
+  /* ── Semantic Accents ── */
+  --accent-emerald: #10b981; /* Success / Verified */
+  --accent-amber: #f59e0b; /* Warning / Pending */
+  --accent-rose: #f43f5e; /* Danger / Rejected */
+  --accent-cyan: #06b6d4; /* Metrics / Analytics */
+  --accent-purple: #0284c7; /* Ocean Blue (No purple) */
+  --accent-pink: #f43f5e;
+
+  /* ── Radii ── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.65);
 }
 
 :root[data-theme="light"] {
-  --bg-app: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --bg-sidebar: #ffffff;
-  --bg-topbar: rgba(255, 255, 255, 0.92);
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-color-hover: rgba(0, 0, 0, 0.16);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --primary: #4f46e5;
-  --primary-light: #6366f1;
-  --primary-dark: #4338ca;
-  --primary-glow: rgba(79, 70, 229, 0.18);
-  --accent-cyan: #0891b2;
-  --accent-emerald: #059669;
-  --accent-amber: #d97706;
-  --accent-pink: #db2777;
-  --accent-purple: #9333ea;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 14px 0 rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.2);
+  /* =========================================================
+     SKILLBRIDGE — ACADEMIA PARCHMENT & WARM TERRACOTTA
+     Soft Ivory/Parchment Foundation + Terracotta Accent + Warm Stone Surfaces
+     (Comfortable for prolonged reading, zero pure white #FFFFFF, zero gradients)
+     ========================================================= */
+
+  /* ── Page & Surface Hierarchy ── */
+  --bg-app: #f4efec; /* Soft warm parchment foundation */
+  --bg-sidebar: #efe7e2; /* Warm stone/linen sidebar */
+  --bg-topbar: #efe7e2; /* Warm stone/linen topbar */
+
+  --bg-card: #faf7f4; /* Warm ivory card surface */
+  --bg-card-hover: #f0e8e1; /* Warm stone hover surface */
+  --bg-elevated: #e8dfd7; /* Elevated warm stone surface */
+
+  /* ── Borders ── */
+  --border-color: #dcd3c9; /* Warm stone/linen border */
+  --border-color-hover: #c5b8aa;
+  --border-subtle: #e8e0d6;
+
+  /* ── Typography ── */
+  --text-primary: #25211e; /* Rich warm espresso charcoal */
+  --text-secondary: #5b524a; /* Muted espresso slate */
+  --text-muted: #8c8176; /* Soft warm stone muted text */
+
+  /* ── Primary Accent: Academic Terracotta / Warm Rust ── */
+  --primary: #b85b3e;
+  --primary-light: #c86a4c;
+  --primary-dark: #96452b;
+
+  --primary-subtle: rgba(184, 91, 62, 0.08);
+  --primary-border: rgba(184, 91, 62, 0.22);
+  --primary-glow: transparent;
+
+  /* ── Semantic Accents (Muted Academic Palette) ── */
+  --accent-emerald: #3d7858; /* Muted Sage Green */
+  --accent-amber: #b87b2e; /* Warm Ochre / Amber */
+  --accent-rose: #b54336; /* Brick Terracotta Red */
+  --accent-cyan: #3b6f7a; /* Muted Slate Teal */
+  --accent-purple: #b85b3e; /* Mapped to Terracotta */
+  --accent-pink: #b54336;
+
+  /* ── Radii ── */
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* ── Shadows (Natural Warm Cast) ── */
+  --shadow-sm: 0 1px 2px rgba(37, 33, 30, 0.04);
+  --shadow-md: 0 3px 8px rgba(37, 33, 30, 0.06);
+  --shadow-lg: 0 6px 16px rgba(37, 33, 30, 0.08);
+  --shadow-xl: 0 12px 28px rgba(37, 33, 30, 0.1);
+  /* =========================================================
+     GLOBAL TAILWIND COMPONENT OVERRIDES
+     (Darker, high-contrast warm stone & deeper rich rust/terracotta)
+     ========================================================= */
+  --color-slate-950: #ded3c7; /* Darker elevated stone */
+  --color-slate-900: #f4eee7; /* Deeper warm parchment base */
+  --color-slate-800: #cebeae; /* Pronounced borders/hover states */
+  --color-slate-700: #b09e8c; /* Clear structural borders */
+  --color-slate-600: #8c7a68;
+  --color-slate-500: #6f6050; /* Punchier muted text */
+  --color-slate-400: #4a3e33; /* High-contrast secondary text */
+  --color-slate-300: #2c241c;
+  --color-slate-200: #1b1612; /* Deep charcoal primary text */
+  --color-slate-100: #0f0d0b; /* Near-black headings */
+  --color-slate-50: #0a0807;
+
+  --color-white: #0f0d0b;
+  --color-black: #f4eee7;
+
+  /* Map Indigo, Sky, and Blue to Deeper, High-Contrast Rust / Terracotta */
+  --color-indigo-600: #8d361b; /* Deep burnt terracotta */
+  --color-indigo-500: #a54324; /* Rich vivid rust */
+  --color-indigo-400: #bf5532;
+  --color-indigo-300: #d66f4c;
+  --color-indigo-200: #e28e70;
+
+  --color-sky-600: #8d361b;
+  --color-sky-500: #a54324;
+  --color-sky-400: #bf5532;
+  --color-sky-300: #d66f4c;
+  --color-sky-200: #e28e70;
+
+  --color-blue-600: #8d361b;
+  --color-blue-500: #a54324;
+  --color-blue-400: #bf5532;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  font-family:
+    "Inter",
+    "DM Sans",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
   background-color: var(--bg-app);
   color: var(--text-primary);
+
   min-height: 100vh;
+
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==========================================
-   CUSTOM SCROLLBAR SYSTEM
-   ========================================== */
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-light, #818cf8) transparent;
+  scrollbar-color: #26354f transparent;
 }
 
-/* Webkit Scrollbars (Chrome, Safari, Edge, Opera) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.35);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  transition: background 0.25s ease;
+  background: #26354f;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary, #6366f1);
-  border: 1px solid transparent;
-  background-clip: content-box;
+  background: #3b5075;
 }
 
 ::-webkit-scrollbar-corner {
@@ -106,13 +203,14 @@ body {
 }
 
 :root[data-theme="light"] * {
-  scrollbar-color: var(--primary, #4f46e5) transparent;
+  scrollbar-color: #d3c7b9 transparent;
 }
 
 :root[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: rgba(79, 70, 229, 0.3);
+  background: #d3c7b9;
+  border-radius: 4px;
 }
 
 :root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary, #4f46e5);
+  background: #bbaf9e;
 }

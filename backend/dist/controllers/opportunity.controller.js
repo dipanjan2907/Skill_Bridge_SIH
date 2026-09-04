@@ -68,10 +68,11 @@ export const createOpportunity = async (req, res) => {
         try {
             await connection.beginTransaction();
             const [oppResult] = await connection.query(`INSERT INTO opportunities 
-          (industry_id, type, title, description, location, work_mode, stipend_min, stipend_max, duration, eligibility, application_deadline, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+          (industry_id, type, target_audience, title, description, location, work_mode, stipend_min, stipend_max, duration, eligibility, application_deadline, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
                 industryId,
                 data.type,
+                data.targetAudience || "STUDENT",
                 data.title,
                 data.description,
                 data.location || null,
@@ -260,6 +261,7 @@ export const updateOpportunity = async (req, res) => {
             await connection.beginTransaction();
             await connection.query(`UPDATE opportunities SET
           type = COALESCE(?, type),
+          target_audience = COALESCE(?, target_audience),
           title = COALESCE(?, title),
           description = COALESCE(?, description),
           location = COALESCE(?, location),
@@ -272,6 +274,7 @@ export const updateOpportunity = async (req, res) => {
           status = COALESCE(?, status)
         WHERE id = ? AND industry_id = ?`, [
                 data.type,
+                data.targetAudience,
                 data.title,
                 data.description,
                 data.location,
@@ -465,7 +468,7 @@ export const closeOpportunity = async (req, res) => {
 // 8. Get Public Published Opportunities (For Students)
 export const getPublicPublishedOpportunities = async (req, res) => {
     try {
-        const { type, search } = req.query;
+        const { type, search, audience } = req.query;
         let query = `
       SELECT 
         o.*,
@@ -478,9 +481,18 @@ export const getPublicPublishedOpportunities = async (req, res) => {
       WHERE o.status = 'published'
     `;
         const queryParams = [];
-        if (type && typeof type === "string" && (type === "internship" || type === "job")) {
-            query += ` AND o.type = ?`;
-            queryParams.push(type);
+        if (audience && typeof audience === "string") {
+            const audUpper = audience.toUpperCase();
+            if (audUpper === "ACADEMICIAN") {
+                query += ` AND (o.target_audience = 'ACADEMICIAN' OR o.target_audience = 'BOTH')`;
+            }
+            else if (audUpper === "STUDENT") {
+                query += ` AND (o.target_audience = 'STUDENT' OR o.target_audience = 'BOTH')`;
+            }
+        }
+        if (type && typeof type === "string" && type.trim() !== "" && type.toLowerCase() !== "all") {
+            query += ` AND LOWER(o.type) = LOWER(?)`;
+            queryParams.push(type.trim());
         }
         if (search && typeof search === "string" && search.trim() !== "") {
             query += ` AND (o.title LIKE ? OR o.description LIKE ? OR ip.company_name LIKE ?)`;
@@ -564,6 +576,136 @@ export const getAllPublicCompanies = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Server error fetching companies: " + error.message,
+        });
+    }
+};
+/**
+ * @route   POST /api/opportunities/:id/save
+ * @desc    Save/bookmark an opportunity for the logged in user
+ * @access  Private (Authenticated User)
+ */
+export const toggleSaveOpportunity = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const rawOppId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+        const oppId = parseInt(String(rawOppId), 10);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized." });
+            return;
+        }
+        if (isNaN(oppId)) {
+            res.status(400).json({ success: false, message: "Invalid opportunity ID." });
+            return;
+        }
+        // Check if opportunity exists
+        const [oppRows] = await pool.query(`SELECT id FROM opportunities WHERE id = ?`, [oppId]);
+        if (oppRows.length === 0) {
+            res.status(404).json({ success: false, message: "Opportunity not found." });
+            return;
+        }
+        // Check if already saved
+        const [existing] = await pool.query(`SELECT id FROM saved_opportunities WHERE user_id = ? AND opportunity_id = ?`, [userId, oppId]);
+        let isSaved = false;
+        if (existing.length > 0) {
+            // Unsave
+            await pool.query(`DELETE FROM saved_opportunities WHERE user_id = ? AND opportunity_id = ?`, [userId, oppId]);
+            isSaved = false;
+        }
+        else {
+            // Save
+            await pool.query(`INSERT INTO saved_opportunities (user_id, opportunity_id) VALUES (?, ?)`, [userId, oppId]);
+            isSaved = true;
+        }
+        res.status(200).json({
+            success: true,
+            isSaved,
+            message: isSaved
+                ? "Opportunity saved to your bookmarks."
+                : "Opportunity removed from your bookmarks.",
+        });
+    }
+    catch (error) {
+        console.error("toggleSaveOpportunity error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error toggling saved opportunity: " + error.message,
+        });
+    }
+};
+/**
+ * @route   GET /api/opportunities/saved
+ * @desc    Get all saved opportunities for current logged in user
+ * @access  Private (Authenticated User)
+ */
+export const getSavedOpportunities = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized." });
+            return;
+        }
+        const query = `
+      SELECT 
+        o.*,
+        ip.company_name,
+        ip.logo AS company_logo,
+        ip.industry_sector,
+        ip.location AS company_location,
+        so.created_at AS saved_at
+      FROM saved_opportunities so
+      JOIN opportunities o ON so.opportunity_id = o.id
+      JOIN industry_profiles ip ON o.industry_id = ip.id
+      WHERE so.user_id = ?
+      ORDER BY so.created_at DESC
+    `;
+        const [oppRows] = await pool.query(query, [userId]);
+        const opportunitiesWithSkills = await Promise.all(oppRows.map(async (opp) => {
+            const skills = await fetchOpportunitySkills(opp.id);
+            return {
+                ...opp,
+                requiredSkills: skills,
+                isSaved: true,
+            };
+        }));
+        const savedIds = oppRows.map((opp) => opp.id);
+        res.status(200).json({
+            success: true,
+            opportunities: opportunitiesWithSkills,
+            savedIds,
+        });
+    }
+    catch (error) {
+        console.error("getSavedOpportunities error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error fetching saved opportunities: " + error.message,
+        });
+    }
+};
+/**
+ * @route   GET /api/opportunities/saved/ids
+ * @desc    Get saved opportunity IDs for quick hydration
+ * @access  Private (Authenticated User)
+ */
+export const getSavedOpportunityIds = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized." });
+            return;
+        }
+        const [rows] = await pool.query(`SELECT opportunity_id FROM saved_opportunities WHERE user_id = ?`, [userId]);
+        const savedIds = rows.map((r) => r.opportunity_id);
+        res.status(200).json({
+            success: true,
+            savedIds,
+        });
+    }
+    catch (error) {
+        console.error("getSavedOpportunityIds error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error fetching saved IDs: " + error.message,
         });
     }
 };

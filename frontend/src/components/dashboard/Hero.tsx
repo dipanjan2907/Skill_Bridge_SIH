@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 
 const Hero = () => {
   return (
@@ -16,11 +15,6 @@ const Hero = () => {
           We'll help you bridge the gap between your skills and your dream
           career.
         </p>
-
-        <button className="primary-btn">
-          Start My Journey
-          <ArrowRight size={17} />
-        </button>
       </div>
 
       <div className="hero-illustration absolute">

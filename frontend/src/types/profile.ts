@@ -25,6 +25,7 @@ export interface StudentProfileData {
   degree?: string;
   department?: string;
   roll_number?: string;
+  student_id?: string;
   current_sem?: string;
   cgpa?: number | string;
   expected_grad?: string;
@@ -65,6 +66,7 @@ export interface CertItem {
   title: string;
   issuer: string;
   issue_year: string;
+  credential_url?: string;
 }
 
 export interface ProfileApiResponse {

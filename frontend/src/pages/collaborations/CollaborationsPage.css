@@ -42,9 +42,7 @@
 }
 
 .collab-hero-text h1 span {
-  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary-light);
 }
 
 .collab-hero-text p {
@@ -93,21 +91,19 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.85rem 1.6rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: var(--primary);
   color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-  transition: all 0.25s ease;
+  transition: background 0.2s ease;
 }
 
 .btn-create-initiative:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  background: var(--primary-dark);
 }
 
 /* Toast Message */
@@ -177,9 +173,9 @@
 }
 
 .collab-tab.active {
-  color: #818cf8;
-  background: rgba(99, 102, 241, 0.12);
-  border-bottom: 2px solid #6366f1;
+  color: var(--primary-light);
+  background: var(--primary-subtle);
+  border-bottom: 2px solid var(--primary);
 }
 
 /* Filter Bar */
@@ -218,7 +214,7 @@
 }
 
 .collab-search-box input:focus {
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .clear-search {
@@ -268,9 +264,8 @@
 }
 
 .collab-filter-group select:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), 0 4px 12px rgba(0, 0, 0, 0.3);
-  background-color: rgba(15, 23, 42, 0.95);
+  border-color: var(--primary);
+  background-color: var(--bg-card);
 }
 
 .collab-filter-group select option {
@@ -692,18 +687,17 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.85rem 1.8rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: var(--primary);
   color: #ffffff;
   font-weight: 600;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  transition: background 0.2s ease;
 }
 
 .btn-primary-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  background: var(--primary-dark);
 }
 
 .btn-cancel-app {
@@ -776,9 +770,8 @@
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #6366f1;
-  background-color: rgba(15, 23, 42, 0.95);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), 0 4px 14px rgba(0, 0, 0, 0.35);
+  border-color: var(--primary);
+  background-color: var(--bg-card);
 }
 
 .form-group select option {
@@ -1139,3 +1132,113 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* =========================================================
+   LIGHT MODE OVERRIDES FOR COLLABORATIONS
+   ========================================================= */
+:root[data-theme="light"] .collab-hero-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+:root[data-theme="light"] .collab-hero-text h1 {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-hero-text p {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .collab-hero-pill {
+  background: var(--primary-subtle);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+:root[data-theme="light"] .btn-refresh-header {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .btn-refresh-header:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-search-box input {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-filter-group select {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+:root[data-theme="light"] .collab-card:hover {
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-md);
+}
+
+:root[data-theme="light"] .collab-card-title {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-card-desc {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .collab-type-badge {
+  background: var(--primary-subtle);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+:root[data-theme="light"] .btn-view-details {
+  background: var(--primary-subtle);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+:root[data-theme="light"] .btn-view-details:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .btn-manage-card {
+  background: var(--bg-app);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .collab-modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xl);
+}
+
+:root[data-theme="light"] .collab-detail-grid {
+  background: var(--bg-app);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="light"] .box-val {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .collab-modal-close {
+  background: var(--bg-app);
+  color: var(--text-secondary);
+}
+

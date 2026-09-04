@@ -82,6 +82,7 @@ export const initTables = async () => {
         expected_stipend_max INT,
         preferred_locations JSON,
         target_roles JSON,
+        student_id VARCHAR(100) NULL,
         career_match_score INT NULL,
         verification_status VARCHAR(50) DEFAULT 'pending',
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -91,11 +92,16 @@ export const initTables = async () => {
 
     try {
       await pool.query(`ALTER TABLE student_profiles MODIFY COLUMN cgpa DECIMAL(3, 2) DEFAULT NULL`);
+    } catch (_e) {}
+    try {
       await pool.query(`ALTER TABLE student_profiles ADD COLUMN verification_status VARCHAR(50) DEFAULT 'pending'`);
+    } catch (_e) {}
+    try {
       await pool.query(`ALTER TABLE student_profiles ADD COLUMN career_match_score INT NULL`);
-    } catch (_e) {
-      // Columns already set
-    }
+    } catch (_e) {}
+    try {
+      await pool.query(`ALTER TABLE student_profiles ADD COLUMN student_id VARCHAR(100) NULL`);
+    } catch (_e) {}
 
     // 4. Skills Table (id, name, category)
     await pool.query(`
@@ -150,6 +156,52 @@ export const initTables = async () => {
         issuer VARCHAR(255) NOT NULL,
         issue_year VARCHAR(10),
         credential_url VARCHAR(255),
+        FOREIGN KEY (student_id) REFERENCES student_profiles(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Safe non-destructive additive migrations for student_certifications
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN issue_date DATE NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN credential_id VARCHAR(255) NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN file_name VARCHAR(255) NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN file_type VARCHAR(100) NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN file_size INT NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN verification_status VARCHAR(50) DEFAULT 'pending'`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN verified_by INT NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN verified_at TIMESTAMP NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE student_certifications ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`); } catch (_e) {}
+
+    // 7b. Student Resumes Table (Only 1 active resume per student)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS student_resumes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT UNIQUE NOT NULL,
+        file_url VARCHAR(500) NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(100) NOT NULL,
+        file_size INT NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES student_profiles(id) ON DELETE CASCADE
+      )
+    `);
+
+    // 7c. Student Work & Internship Experiences Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS student_work_experiences (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        company_name VARCHAR(255) NOT NULL,
+        location VARCHAR(255) NULL,
+        employment_type VARCHAR(100) DEFAULT 'Full-time',
+        start_date VARCHAR(50) NULL,
+        end_date VARCHAR(50) NULL,
+        is_current BOOLEAN DEFAULT FALSE,
+        description TEXT NULL,
+        skills_used JSON NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (student_id) REFERENCES student_profiles(id) ON DELETE CASCADE
       )
     `);
@@ -221,6 +273,10 @@ export const initTables = async () => {
       )
     `);
 
+    // Safe non-destructive additive migrations for opportunities
+    try { await pool.query(`ALTER TABLE opportunities MODIFY COLUMN type VARCHAR(100) NOT NULL`); } catch (_e) {}
+    try { await pool.query(`ALTER TABLE opportunities ADD COLUMN target_audience VARCHAR(50) NOT NULL DEFAULT 'STUDENT'`); } catch (_e) {}
+
     // 11. Opportunity Skills Table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS opportunity_skills (
@@ -233,6 +289,37 @@ export const initTables = async () => {
         UNIQUE KEY unique_opp_skill (opportunity_id, skill_id),
         FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE,
         FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+      )
+    `);
+
+    // 11b. Saved Opportunities Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS saved_opportunities (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        opportunity_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_saved_opp_user (user_id),
+        INDEX idx_saved_opp_opportunity (opportunity_id),
+        UNIQUE KEY unique_user_saved_opp (user_id, opportunity_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
+      )
+    `);
+
+    // 11c. Student Learning Progress Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS student_learning_progress (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        path_id VARCHAR(100) NOT NULL,
+        module_id VARCHAR(100) NOT NULL,
+        status ENUM('not_started', 'in_progress', 'completed') DEFAULT 'in_progress',
+        progress_pct INT DEFAULT 0,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_learning_user (user_id),
+        UNIQUE KEY unique_user_module (user_id, path_id, module_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
 

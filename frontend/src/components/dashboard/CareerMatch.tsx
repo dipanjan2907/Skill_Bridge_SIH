@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Target,
   CheckCircle2,
   ArrowRight,
   Loader2,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -13,15 +14,23 @@ import { API_BASE_URL } from "../../config/api";
 
 const CareerMatch: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const role = user?.role ? String(user.role).toLowerCase() : "student";
+
   const [loading, setLoading] = useState<boolean>(true);
   const [targetRole, setTargetRole] = useState<string | null>(null);
   const [matchScore, setMatchScore] = useState<number | null>(null);
   const [verifiedCount, setVerifiedCount] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchCareerMatch = async () => {
-      // Check session cache first
+  if (role !== "student") {
+    return null;
+  }
+
+  const fetchCareerMatch = useCallback(async (forceRefresh: boolean = false) => {
+    if (forceRefresh) {
+      sessionStorage.removeItem("sb_career_match");
+      sessionStorage.removeItem("sb_student_profile");
+    } else {
       const cached = sessionStorage.getItem("sb_career_match");
       if (cached) {
         try {
@@ -33,9 +42,22 @@ const CareerMatch: React.FC = () => {
           return;
         } catch (_e) {}
       }
+    }
 
-      setLoading(true);
-      try {
+    setLoading(true);
+    try {
+      let data: any = null;
+
+      if (!forceRefresh) {
+        const cachedProfile = sessionStorage.getItem("sb_student_profile");
+        if (cachedProfile) {
+          try {
+            data = JSON.parse(cachedProfile);
+          } catch (_e) {}
+        }
+      }
+
+      if (!data || !data.profile) {
         const authToken = token || localStorage.getItem("skillbridge_token");
         if (!authToken) {
           setLoading(false);
@@ -46,54 +68,61 @@ const CareerMatch: React.FC = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 
-        const data = await res.json();
-        if (res.ok && data.profile) {
-          const profile = data.profile;
-          const skills = data.skills || [];
-
-          const count = skills.length;
-          setVerifiedCount(count);
-
-          const primaryRole =
-            Array.isArray(profile.target_roles) &&
-            profile.target_roles.length > 0
-              ? profile.target_roles[0]
-              : profile.department || "Software Engineer";
-
-          setTargetRole(primaryRole);
-
-          const score =
-            skills.length > 0 ? Math.min(98, 70 + skills.length * 6) : null;
-          setMatchScore(score);
-
-          sessionStorage.setItem(
-            "sb_career_match",
-            JSON.stringify({
-              targetRole: primaryRole,
-              matchScore: score,
-              verifiedCount: count,
-            }),
-          );
+        if (res.ok) {
+          data = await res.json();
+          if (data && data.profile) {
+            sessionStorage.setItem("sb_student_profile", JSON.stringify(data));
+          }
         }
-      } catch (err) {
-        console.error("Error fetching student profile for career match:", err);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchCareerMatch();
+      if (data && data.profile) {
+        const profile = data.profile;
+        const skills = data.skills || [];
+
+        const count = skills.length;
+        setVerifiedCount(count);
+
+        const primaryRole =
+          Array.isArray(profile.target_roles) &&
+          profile.target_roles.length > 0
+            ? profile.target_roles[0]
+            : profile.department || "Software Engineer";
+
+        setTargetRole(primaryRole);
+
+        const score =
+          skills.length > 0 ? Math.min(98, 70 + skills.length * 6) : null;
+        setMatchScore(score);
+
+        sessionStorage.setItem(
+          "sb_career_match",
+          JSON.stringify({
+            targetRole: primaryRole,
+            matchScore: score,
+            verifiedCount: count,
+          }),
+        );
+      }
+    } catch (err) {
+      console.error("Error fetching student profile for career match:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchCareerMatch(false);
 
     const handleProfileUpdate = () => {
-      sessionStorage.removeItem("sb_career_match");
-      fetchCareerMatch();
+      fetchCareerMatch(true);
     };
 
     window.addEventListener("profileUpdated", handleProfileUpdate);
     return () => {
       window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
-  }, [token]);
+  }, [fetchCareerMatch]);
 
   if (loading) {
     return (
@@ -108,9 +137,21 @@ const CareerMatch: React.FC = () => {
 
   return (
     <section className="right-card career-card">
-      <div className="right-title">
-        <Target size={18} className="text-indigo-400" />
-        <h2>Career Match</h2>
+      <div className="right-title flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Target size={18} className="text-indigo-400" />
+          <h2>Career Match</h2>
+        </div>
+
+        <button
+          className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-medium"
+          onClick={() => fetchCareerMatch(true)}
+          disabled={loading}
+          title="Recalculate Career Match score"
+        >
+          <RefreshCw size={13} className={loading ? "animate-spin text-indigo-400" : ""} />
+          <span>Recalculate</span>
+        </button>
       </div>
 
       {matchScore !== null && targetRole ? (
@@ -156,7 +197,7 @@ const CareerMatch: React.FC = () => {
               </strong>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Complete your profile or verify skills in your Skill DNA tab to
+              Complete your profile or verify skills in your Skill Matrix tab to
               compute your career match score.
             </p>
           </div>

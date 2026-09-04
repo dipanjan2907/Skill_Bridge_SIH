@@ -33,14 +33,46 @@ const Topbar = ({
     navigate("/login");
   };
 
+  const getInitials = (name?: string): string => {
+    if (!name || !name.trim()) return "SB";
+    const titles = new Set([
+      "dr",
+      "dr.",
+      "mr",
+      "mr.",
+      "mrs",
+      "mrs.",
+      "ms",
+      "ms.",
+      "prof",
+      "prof.",
+      "er",
+      "er.",
+      "shri",
+      "smt",
+      "sir",
+      "madam",
+    ]);
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter((part) => !titles.has(part.toLowerCase()));
+
+    if (parts.length === 0) {
+      const raw = name.replace(/[^a-zA-Z]/g, "");
+      return raw.substring(0, 2).toUpperCase() || "SB";
+    }
+
+    if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   const displayName = user?.name || "Student User";
   const displayRole = user?.role || "Student";
-  const userInitials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+  const userInitials = getInitials(displayName);
 
   return (
     <header className="topbar">
@@ -124,12 +156,9 @@ const Topbar = ({
 
         <span
           className={
-            location.pathname.startsWith("/coming-soon") &&
-            location.search.includes("Learning")
-              ? "active"
-              : ""
+            location.pathname === "/student/learning" ? "active" : ""
           }
-          onClick={() => navigate("/coming-soon?feature=Learning%20Hub")}
+          onClick={() => navigate("/student/learning")}
           style={{ cursor: "pointer" }}
         >
           Learning

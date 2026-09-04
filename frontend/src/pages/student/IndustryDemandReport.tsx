@@ -183,7 +183,9 @@ const IndustryDemandReport: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-100">{item.skillName}</h4>
-                      <span className="text-[11px] text-slate-400 font-medium">{item.category}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {item.category}{item.studentCount !== undefined ? ` • ${item.studentCount} Students` : ""}
+                      </span>
                     </div>
                   </div>
 
