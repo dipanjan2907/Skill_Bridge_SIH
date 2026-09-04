@@ -40,6 +40,7 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeAudienceTab, setActiveAudienceTab] = useState<
     "students" | "industries" | "institutions" | "academicians"
@@ -141,51 +142,98 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-slate-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div
+      className={`min-h-screen font-sans transition-colors duration-300 ${
+        isDark
+          ? "bg-[#0b1329] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200"
+          : "bg-slate-50 text-slate-900 selection:bg-sky-200 selection:text-sky-900"
+      }`}
+    >
       {/* ================= NAVBAR ================= */}
-      <header className="sticky top-0 z-50 bg-[#0b1120]/80 backdrop-blur-xl border-b border-slate-800/80 transition-all">
+      <header
+        className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all ${
+          isDark
+            ? "bg-[#0b1329]/85 border-slate-800/80"
+            : "bg-white/85 border-slate-200/80 shadow-sm"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* LOGO */}
           <Link to="/" className="flex items-center gap-3.5 group">
             <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1">
-                Skill<span className="text-indigo-400">Bridge</span>
+              <span className="text-2xl font-black tracking-tight flex items-center gap-1">
+                <span className={isDark ? "text-white" : "text-slate-900"}>
+                  Skill
+                </span>
+                <span className="text-transparent bg-clip-text bg-amber-500">
+                  Bridge
+                </span>
               </span>
-              <span className="text-[11px] text-slate-400 font-semibold tracking-wider uppercase">
+              <span
+                className={`text-[11px] font-semibold tracking-wider uppercase ${
+                  isDark ? "text-sky-400/80" : "text-sky-600"
+                }`}
+              >
                 Academia &bull; Industry
               </span>
             </div>
           </Link>
 
           {/* DESKTOP NAVIGATION LINKS */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800/80 text-xs font-medium">
+          <nav
+            className={`hidden md:flex items-center gap-1 p-1.5 rounded-full border text-xs font-medium ${
+              isDark
+                ? "bg-slate-900/90 border-slate-800"
+                : "bg-slate-100/90 border-slate-200"
+            }`}
+          >
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              className={`px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-white shadow-xs"
+              }`}
             >
               Home
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              className={`px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-white shadow-xs"
+              }`}
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection("features")}
-              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              className={`px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-white shadow-xs"
+              }`}
             >
               Features
             </button>
             <button
               onClick={() => scrollToSection("who-is-it-for")}
-              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              className={`px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-white shadow-xs"
+              }`}
             >
               Ecosystem
             </button>
             <button
               onClick={() => scrollToSection("industry-demand")}
-              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              className={`px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-white shadow-xs"
+              }`}
             >
               Skill Demand
             </button>
@@ -195,16 +243,20 @@ const LandingPage: React.FC = () => {
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer"
+              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                isDark
+                  ? "bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800"
+                  : "bg-slate-100 border-slate-200 text-sky-600 hover:bg-slate-200"
+              }`}
               title="Toggle Theme"
             >
-              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             {isAuthenticated ? (
               <button
                 onClick={handleDashboardRedirect}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-md shadow-indigo-600/30 flex items-center gap-2 cursor-pointer"
+                className="px-4 py-2 bg-gradient-to-r bg-yellow-600 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-sky-500/25 flex items-center gap-2 cursor-pointer"
               >
                 Go to Dashboard
                 <ArrowRight size={14} />
@@ -213,13 +265,17 @@ const LandingPage: React.FC = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-slate-300 hover:text-white text-xs font-semibold hover:bg-slate-800/50 rounded-xl transition-all"
+                  className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
+                    isDark
+                      ? "text-slate-300 hover:text-white hover:bg-slate-800"
+                      : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/login"
-                  className="px-4.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-xs rounded-xl transition-all shadow-md shadow-indigo-600/25 flex items-center gap-1.5"
+                  className="px-4.5 py-2 bg-gradient-to-r from-sky-500 via-cyan-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-sky-500/25 flex items-center gap-1.5 cursor-pointer"
                 >
                   Get Started
                   <ChevronRight size={14} />
@@ -232,13 +288,21 @@ const LandingPage: React.FC = () => {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300"
+              className={`p-2 rounded-lg border ${
+                isDark
+                  ? "bg-slate-900 border-slate-800 text-amber-400"
+                  : "bg-slate-100 border-slate-200 text-sky-600"
+              }`}
             >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200"
+              className={`p-2.5 rounded-xl border ${
+                isDark
+                  ? "bg-slate-900 border-slate-800 text-slate-200"
+                  : "bg-slate-100 border-slate-200 text-slate-800"
+              }`}
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -247,45 +311,75 @@ const LandingPage: React.FC = () => {
 
         {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-950/95 backdrop-blur-2xl border-b border-slate-800 px-4 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
+          <div
+            className={`md:hidden backdrop-blur-2xl border-b px-4 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200 ${
+              isDark
+                ? "bg-[#0b1329]/95 border-slate-800"
+                : "bg-white/95 border-slate-200"
+            }`}
+          >
             <div className="flex flex-col space-y-2 text-sm font-medium">
               <button
                 onClick={() => scrollToSection("hero")}
-                className="text-left px-3 py-2 text-slate-300 hover:text-indigo-400"
+                className={`text-left px-3 py-2 ${
+                  isDark
+                    ? "text-slate-300 hover:text-sky-400"
+                    : "text-slate-700 hover:text-sky-600"
+                }`}
               >
                 Home
               </button>
               <button
                 onClick={() => scrollToSection("how-it-works")}
-                className="text-left px-3 py-2 text-slate-300 hover:text-indigo-400"
+                className={`text-left px-3 py-2 ${
+                  isDark
+                    ? "text-slate-300 hover:text-sky-400"
+                    : "text-slate-700 hover:text-sky-600"
+                }`}
               >
                 How It Works
               </button>
               <button
                 onClick={() => scrollToSection("features")}
-                className="text-left px-3 py-2 text-slate-300 hover:text-indigo-400"
+                className={`text-left px-3 py-2 ${
+                  isDark
+                    ? "text-slate-300 hover:text-sky-400"
+                    : "text-slate-700 hover:text-sky-600"
+                }`}
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection("who-is-it-for")}
-                className="text-left px-3 py-2 text-slate-300 hover:text-indigo-400"
+                className={`text-left px-3 py-2 ${
+                  isDark
+                    ? "text-slate-300 hover:text-sky-400"
+                    : "text-slate-700 hover:text-sky-600"
+                }`}
               >
                 Ecosystem
               </button>
               <button
                 onClick={() => scrollToSection("industry-demand")}
-                className="text-left px-3 py-2 text-slate-300 hover:text-indigo-400"
+                className={`text-left px-3 py-2 ${
+                  isDark
+                    ? "text-slate-300 hover:text-sky-400"
+                    : "text-slate-700 hover:text-sky-600"
+                }`}
               >
                 Skill Demand
               </button>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex flex-col gap-2">
+            <div
+              className={`pt-4 border-t flex flex-col gap-2 ${
+                isDark ? "border-slate-800" : "border-slate-200"
+              }`}
+            >
               {isAuthenticated ? (
                 <button
                   onClick={handleDashboardRedirect}
-                  className="w-full py-2.5 bg-indigo-600 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-gradient-to-r from-sky-500 to-orange-500 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2"
                 >
                   Go to Dashboard
                   <ArrowRight size={14} />
@@ -294,13 +388,17 @@ const LandingPage: React.FC = () => {
                 <>
                   <Link
                     to="/login"
-                    className="w-full py-2.5 text-center text-slate-200 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold"
+                    className={`w-full py-2.5 text-center rounded-xl text-xs font-semibold border ${
+                      isDark
+                        ? "bg-slate-900 border-slate-800 text-slate-200"
+                        : "bg-slate-100 border-slate-200 text-slate-800"
+                    }`}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/login"
-                    className="w-full py-2.5 text-center text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold"
+                    className="w-full py-2.5 text-center text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-orange-500 rounded-xl text-xs font-semibold"
                   >
                     Get Started
                   </Link>
@@ -316,30 +414,57 @@ const LandingPage: React.FC = () => {
         id="hero"
         className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden"
       >
-        {/* Subtle Ambient Background Gradients */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute top-1/3 left-1/4 w-[300px] h-[250px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
+        {/* Ambient Background Glow Orbs */}
+        <div
+          className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] blur-[130px] rounded-full pointer-events-none ${
+            isDark ? "bg-sky-600/15" : "bg-sky-400/25"
+          }`}
+        />
+        <div
+          className={`absolute top-1/3 left-1/4 w-[320px] h-[280px] blur-[110px] rounded-full pointer-events-none ${
+            isDark ? "bg-cyan-500/15" : "bg-cyan-300/30"
+          }`}
+        />
+        <div
+          className={`absolute bottom-1/4 right-1/4 w-[280px] h-[250px] blur-[100px] rounded-full pointer-events-none ${
+            isDark ? "bg-orange-500/15" : "bg-orange-300/25"
+          }`}
+        />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
             {/* HERO CONTENT */}
             <div className="max-w-2xl text-center lg:text-left space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold tracking-wide">
-                <Sparkles size={14} className="text-indigo-400" />
+              <div
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold tracking-wide shadow-xs ${
+                  isDark
+                    ? "bg-sky-500/10 border-sky-500/25 text-sky-300"
+                    : "bg-sky-50 border-sky-200 text-sky-700"
+                }`}
+              >
+                <Sparkles size={14} className="text-orange-500" />
                 <span>Academia–Industry Convergence Engine</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
+              <h1
+                className={`text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
                 Bridging Academia and{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-400 to-amber-400">
                   Industry Through Skills,
                 </span>{" "}
-                <span className="text-slate-300 font-bold">
+                <span className="text-orange-500 font-bold">
                   Securing Your Future.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+              <p
+                className={`text-base sm:text-lg leading-relaxed font-normal ${
+                  isDark ? "text-slate-300" : "text-slate-600"
+                }`}
+              >
                 SkillBridge connects students, academia and industry through
                 intelligent skill mapping, personalized growth paths and
                 real-world career opportunities.
@@ -348,7 +473,7 @@ const LandingPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
                 <Link
                   to={isAuthenticated ? "/dashboard" : "/login"}
-                  className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r bg-cyan-600 hover:from-sky-400 hover:bg-cyan-700 text-white font-bold text-sm rounded-xl shadow-xl shadow-sky-500/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   Explore SkillBridge
                   <ArrowRight
@@ -359,7 +484,11 @@ const LandingPage: React.FC = () => {
 
                 <button
                   onClick={() => scrollToSection("how-it-works")}
-                  className="w-full sm:w-auto px-6 py-3.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-semibold text-sm rounded-xl border border-slate-800 hover:border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className={`w-full sm:w-auto px-6 py-3.5 font-semibold text-sm rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    isDark
+                      ? "bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800"
+                      : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-xs"
+                  }`}
                 >
                   See how it works
                 </button>
@@ -368,78 +497,126 @@ const LandingPage: React.FC = () => {
                   onClick={() =>
                     navigate(isAuthenticated ? "/opportunities" : "/login")
                   }
-                  className="w-full sm:w-auto px-5 py-3.5 bg-slate-900/50 hover:bg-slate-800/80 text-slate-300 hover:text-white font-semibold text-sm rounded-xl border border-slate-800/80 hover:border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className={`w-full sm:w-auto px-5 py-3.5 font-semibold text-sm rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    isDark
+                      ? "bg-slate-900/60 hover:bg-slate-800/80 text-slate-300 border-slate-800"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                  }`}
                 >
-                  <Search size={16} className="text-indigo-400" />
+                  <Search size={16} className="text-sky-500" />
                   Opportunities
                 </button>
               </div>
 
               {/* Proof / Trust Indicator */}
-              <div className="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-xs text-slate-400">
+              <div
+                className={`pt-6 border-t flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-xs ${
+                  isDark
+                    ? "border-slate-800/80 text-slate-400"
+                    : "border-slate-200 text-slate-500"
+                }`}
+              >
                 <div className="flex items-center -space-x-2">
-                  <i className="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xs font-bold text-indigo-300 not-italic shadow-sm">
+                  <i className="w-8 h-8 rounded-full bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-xs font-bold text-sky-400 not-italic shadow-xs">
                     A
                   </i>
-                  <i className="w-8 h-8 rounded-full bg-cyan-600/30 border border-cyan-500/50 flex items-center justify-center text-xs font-bold text-cyan-300 not-italic shadow-sm">
+                  <i className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-xs font-bold text-cyan-400 not-italic shadow-xs">
                     S
                   </i>
-                  <i className="w-8 h-8 rounded-full bg-emerald-600/30 border border-emerald-500/50 flex items-center justify-center text-xs font-bold text-emerald-300 not-italic shadow-sm">
+                  <i className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xs font-bold text-amber-400 not-italic shadow-xs">
                     R
                   </i>
-                  <i className="w-8 h-8 rounded-full bg-purple-600/30 border border-purple-500/50 flex items-center justify-center text-xs font-bold text-purple-300 not-italic shadow-sm">
+                  <i className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-xs font-bold text-orange-400 not-italic shadow-xs">
                     +
                   </i>
                 </div>
-                <span className="font-medium text-slate-300 text-center sm:text-left">
+                <span className="font-medium text-center sm:text-left">
                   Built to turn learning into measurable career readiness.
                 </span>
               </div>
             </div>
 
-            {/* PURE HTML/CSS/REACT 3D SPATIAL ECOSYSTEM CONVERGENCE DIAGRAM */}
+            {/* 3D SPATIAL ECOSYSTEM CONVERGENCE DIAGRAM */}
             <div className="w-full lg:w-[580px] shrink-0 relative">
-              <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-800/90 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-indigo-500/10 relative overflow-hidden">
+              <div
+                className={`backdrop-blur-2xl border rounded-3xl p-6 sm:p-7 shadow-2xl relative overflow-hidden ${
+                  isDark
+                    ? "bg-slate-900/90 border-slate-800 shadow-sky-950/40"
+                    : "bg-white/95 border-slate-200 shadow-slate-200/80"
+                }`}
+              >
                 {/* Header Tag */}
                 <div className="text-center mb-6">
-                  <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-3.5 py-1 rounded-full border border-indigo-500/20 shadow-sm">
-                    AI-Powered Tri-Party Spatial Ecosystem
+                  <span
+                    className={`text-[11px] font-extrabold uppercase tracking-widest px-3.5 py-1.5 rounded-full border shadow-xs ${
+                      isDark
+                        ? "text-sky-300 bg-sky-500/10 border-sky-500/25"
+                        : "text-sky-700 bg-sky-50 border-sky-200"
+                    }`}
+                  >
+                    Tri-Party Spatial Ecosystem
                   </span>
                 </div>
 
                 {/* Ambient Background Glow Orbs */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-600/20 blur-[70px] rounded-full pointer-events-none" />
-                <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-cyan-500/15 blur-[50px] rounded-full pointer-events-none" />
-                <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-500/15 blur-[50px] rounded-full pointer-events-none" />
+                <div
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 blur-[70px] rounded-full pointer-events-none ${
+                    isDark ? "bg-sky-600/20" : "bg-sky-300/30"
+                  }`}
+                />
+                <div
+                  className={`absolute top-1/4 left-1/4 w-40 h-40 blur-[50px] rounded-full pointer-events-none ${
+                    isDark ? "bg-cyan-500/15" : "bg-cyan-200/40"
+                  }`}
+                />
+                <div
+                  className={`absolute bottom-1/4 right-1/4 w-40 h-40 blur-[50px] rounded-full pointer-events-none ${
+                    isDark ? "bg-orange-500/15" : "bg-orange-200/40"
+                  }`}
+                />
 
                 {/* 3D SPATIAL CANVAS CONTAINER */}
                 <div className="relative min-h-[380px] flex flex-col justify-between items-center py-2 px-1">
                   {/* 1. TOP NODE: STUDENT */}
                   <div className="relative z-20 group">
-                    <div className="bg-slate-950/90 backdrop-blur-xl border border-indigo-500/40 hover:border-indigo-400/80 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-xl shadow-indigo-500/20 transition-all transform hover:-translate-y-1 cursor-default">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                    <div
+                      className={`backdrop-blur-xl border hover:border-sky-400 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-xl transition-all transform hover:-translate-y-1 cursor-default ${
+                        isDark
+                          ? "bg-slate-950/95 border-sky-500/40 shadow-sky-950/50"
+                          : "bg-white border-sky-300 shadow-sky-100"
+                      }`}
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-500 shrink-0">
                         <GraduationCap size={20} />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-white tracking-wide">
+                          <span
+                            className={`text-xs font-bold tracking-wide ${
+                              isDark ? "text-white" : "text-slate-900"
+                            }`}
+                          >
                             STUDENT
                           </span>
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                         </div>
-                        <span className="text-[10px] text-slate-400 font-medium">
+                        <span
+                          className={`text-[10px] font-medium ${
+                            isDark ? "text-slate-400" : "text-slate-500"
+                          }`}
+                        >
                           Skill Matrix & Profile
                         </span>
                       </div>
                     </div>
                     {/* Floating mini badge */}
-                    <div className="absolute -top-3 -right-2 bg-indigo-950/90 border border-indigo-500/30 text-indigo-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow">
+                    <div className="absolute -top-3 -right-2 bg-sky-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                       Assessed
                     </div>
                   </div>
 
                   {/* VERTICAL STREAM: STUDENT DOWN TO CORE */}
-                  <div className="w-0.5 h-12 bg-gradient-to-b from-indigo-500 via-indigo-400 to-cyan-400 relative overflow-hidden rounded-full my-1">
+                  <div className="w-0.5 h-12 bg-gradient-to-b from-sky-500 via-cyan-400 to-amber-400 relative overflow-hidden rounded-full my-1">
                     <div className="absolute top-0 left-0 w-full h-full bg-white/80 animate-pulse" />
                   </div>
 
@@ -447,106 +624,170 @@ const LandingPage: React.FC = () => {
                   <div className="w-full flex items-center justify-between gap-2 relative z-20 my-1">
                     {/* 2. LEFT NODE: ACADEMIA */}
                     <div className="relative group shrink-0">
-                      <div className="bg-slate-950/90 backdrop-blur-xl border border-cyan-500/40 hover:border-cyan-400/80 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xl shadow-cyan-500/20 transition-all transform hover:-translate-y-1 cursor-default">
-                        <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                      <div
+                        className={`backdrop-blur-xl border hover:border-cyan-400 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xl transition-all transform hover:-translate-y-1 cursor-default ${
+                          isDark
+                            ? "bg-slate-950/95 border-cyan-500/40 shadow-cyan-950/50"
+                            : "bg-white border-cyan-300 shadow-cyan-100"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-500 shrink-0">
                           <Building2 size={18} />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-white tracking-wide">
+                          <div
+                            className={`text-xs font-bold tracking-wide ${
+                              isDark ? "text-white" : "text-slate-900"
+                            }`}
+                          >
                             ACADEMIA
                           </div>
-                          <div className="text-[9px] text-slate-400 font-medium">
+                          <div
+                            className={`text-[9px] font-medium ${
+                              isDark ? "text-slate-400" : "text-slate-500"
+                            }`}
+                          >
                             Curriculum
                           </div>
                         </div>
                       </div>
-                      <div className="absolute -bottom-2 left-2 bg-cyan-950/90 border border-cyan-500/30 text-cyan-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow">
+                      <div className="absolute -bottom-2 left-2 bg-cyan-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                         Pathways
                       </div>
                     </div>
 
                     {/* STREAM: ACADEMIA RIGHT TO CORE */}
-                    <div className="flex-1 h-0.5 bg-gradient-to-r from-cyan-500 via-indigo-500 to-indigo-400 relative overflow-hidden rounded-full mx-1">
+                    <div className="flex-1 h-0.5 bg-gradient-to-r from-cyan-500 via-sky-500 to-amber-400 relative overflow-hidden rounded-full mx-1">
                       <div className="absolute top-0 left-0 w-full h-full bg-cyan-300/80 animate-pulse" />
                     </div>
 
                     {/* 3. CENTRAL FOCAL CORE: SKILLBRIDGE CORE */}
                     <div className="relative shrink-0 group">
                       {/* Pulse outer rings */}
-                      <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-cyan-400 to-purple-500 opacity-40 blur-md group-hover:opacity-75 transition duration-500 animate-pulse" />
+                      <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-sky-500 via-cyan-400 to-orange-500 opacity-40 blur-md group-hover:opacity-75 transition duration-500 animate-pulse" />
 
-                      <div className="relative bg-slate-950/95 backdrop-blur-2xl border-2 border-indigo-400/70 rounded-2xl px-4 py-3 text-center shadow-2xl shadow-indigo-500/50">
-                        <div className="w-10 h-10 mx-auto mb-1.5 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-0.5 shadow-md">
-                          <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-indigo-300 animate-spin-slow" />
+                      <div
+                        className={`relative backdrop-blur-2xl border-2 rounded-2xl px-4 py-3 text-center shadow-2xl ${
+                          isDark
+                            ? "bg-slate-950/95 border-sky-400/70 shadow-sky-500/40"
+                            : "bg-white border-sky-500 shadow-sky-200"
+                        }`}
+                      >
+                        <div className="w-10 h-10 mx-auto mb-1.5 rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-orange-500 p-0.5 shadow-md">
+                          <div
+                            className={`w-full h-full rounded-[10px] flex items-center justify-center ${
+                              isDark ? "bg-slate-950" : "bg-white"
+                            }`}
+                          >
+                            <Sparkles className="w-5 h-5 text-sky-500 animate-spin-slow" />
                           </div>
                         </div>
-                        <div className="text-xs font-black text-white tracking-wider uppercase">
+                        <div
+                          className={`text-xs font-black tracking-wider uppercase ${
+                            isDark ? "text-white" : "text-slate-900"
+                          }`}
+                        >
                           SkillBridge
                         </div>
                       </div>
                     </div>
 
                     {/* STREAM: CORE OUTWARD RIGHT TO CAREER OUTCOMES */}
-                    <div className="flex-1 h-0.5 bg-gradient-to-r from-indigo-400 via-emerald-400 to-emerald-500 relative overflow-hidden rounded-full mx-1">
-                      <div className="absolute top-0 left-0 w-full h-full bg-emerald-300/80 animate-pulse" />
+                    <div className="flex-1 h-0.5 bg-gradient-to-r from-sky-400 via-amber-400 to-orange-400 relative overflow-hidden rounded-full mx-1">
+                      <div className="absolute top-0 left-0 w-full h-full bg-amber-300/80 animate-pulse" />
                     </div>
 
                     {/* 4. RIGHT OUTPUT NODE: CAREER OUTCOMES */}
                     <div className="relative group shrink-0">
-                      <div className="bg-slate-950/90 backdrop-blur-xl border border-emerald-500/40 hover:border-emerald-400/80 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xl shadow-emerald-500/20 transition-all transform hover:-translate-y-1 cursor-default">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                      <div
+                        className={`backdrop-blur-xl border hover:border-amber-400 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xl transition-all transform hover:-translate-y-1 cursor-default ${
+                          isDark
+                            ? "bg-slate-950/95 border-amber-500/40 shadow-amber-950/50"
+                            : "bg-white border-amber-300 shadow-amber-100"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0">
                           <Target size={18} />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-emerald-300 tracking-wide">
+                          <div className="text-xs font-bold text-amber-500 tracking-wide">
                             OUTCOMES
                           </div>
-                          <div className="text-[9px] text-slate-400 font-medium">
+                          <div
+                            className={`text-[9px] font-medium ${
+                              isDark ? "text-slate-400" : "text-slate-500"
+                            }`}
+                          >
                             Readiness +24%
                           </div>
                         </div>
                       </div>
-                      <div className="absolute -top-2 right-2 bg-emerald-950/90 border border-emerald-500/30 text-emerald-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow">
+                      <div className="absolute -top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                         92% Match
                       </div>
                     </div>
                   </div>
 
                   {/* VERTICAL STREAM: INDUSTRY UP TO CORE */}
-                  <div className="w-0.5 h-12 bg-gradient-to-t from-purple-500 via-indigo-500 to-indigo-400 relative overflow-hidden rounded-full my-1">
-                    <div className="absolute top-0 left-0 w-full h-full bg-purple-300/80 animate-pulse" />
+                  <div className="w-0.5 h-12 bg-gradient-to-t from-orange-500 via-amber-400 to-sky-400 relative overflow-hidden rounded-full my-1">
+                    <div className="absolute top-0 left-0 w-full h-full bg-orange-300/80 animate-pulse" />
                   </div>
 
                   {/* 5. BOTTOM NODE: INDUSTRY */}
                   <div className="relative z-20 group">
-                    <div className="bg-slate-950/90 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/80 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-xl shadow-purple-500/20 transition-all transform hover:-translate-y-1 cursor-default">
-                      <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                    <div
+                      className={`backdrop-blur-xl border hover:border-orange-400 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-xl transition-all transform hover:-translate-y-1 cursor-default ${
+                        isDark
+                          ? "bg-slate-950/95 border-orange-500/40 shadow-orange-950/50"
+                          : "bg-white border-orange-300 shadow-orange-100"
+                      }`}
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-500 shrink-0">
                         <Briefcase size={20} />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white tracking-wide">
+                        <div
+                          className={`text-xs font-bold tracking-wide ${
+                            isDark ? "text-white" : "text-slate-900"
+                          }`}
+                        >
                           INDUSTRY
                         </div>
-                        <span className="text-[10px] text-slate-400 font-medium">
+                        <span
+                          className={`text-[10px] font-medium ${
+                            isDark ? "text-slate-400" : "text-slate-500"
+                          }`}
+                        >
                           Job Demand & Hiring
                         </span>
                       </div>
                     </div>
                     {/* Floating mini badge */}
-                    <div className="absolute -bottom-3 -left-2 bg-purple-950/90 border border-purple-500/30 text-purple-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow">
+                    <div className="absolute -bottom-3 -left-2 bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                       Verified
                     </div>
                   </div>
 
                   {/* FLOATING GLASS UI CHIPS */}
-                  <div className="absolute top-3 left-4 bg-slate-950/80 backdrop-blur-md border border-rose-500/40 text-rose-300 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md pointer-events-none">
-                    <CheckCircle2 size={13} className="text-rose-400" />
+                  <div
+                    className={`absolute top-3 left-4 backdrop-blur-md border text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md pointer-events-none ${
+                      isDark
+                        ? "bg-slate-900/90 border-orange-500/40 text-orange-400"
+                        : "bg-white/95 border-orange-200 text-orange-600"
+                    }`}
+                  >
+                    <CheckCircle2 size={13} className="text-orange-500" />
                     Skill gap detected
                   </div>
 
-                  <div className="absolute bottom-4 right-4 bg-slate-950/80 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md pointer-events-none">
-                    <Sparkles size={13} className="text-indigo-400" />
+                  <div
+                    className={`absolute bottom-4 right-4 backdrop-blur-md border text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md pointer-events-none ${
+                      isDark
+                        ? "bg-slate-900/90 border-sky-500/40 text-sky-400"
+                        : "bg-white/95 border-sky-200 text-sky-700"
+                    }`}
+                  >
+                    <Sparkles size={13} className="text-sky-500" />
                     Internship matched
                   </div>
                 </div>
@@ -559,17 +800,29 @@ const LandingPage: React.FC = () => {
       {/* ================= 2. THE PROBLEM ================= */}
       <section
         id="the-problem"
-        className="py-16 bg-slate-950/60 border-y border-slate-800/80 relative"
+        className={`py-16 border-y relative ${
+          isDark
+            ? "bg-slate-900/60 border-slate-800"
+            : "bg-slate-100/70 border-slate-200"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-500 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
               The Challenge We Solve
             </span>
-            <h2 className="text-3xl font-black text-white">
+            <h2
+              className={`text-3xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               The Skill-Gap Paradigm in Technical Education
             </h2>
-            <p className="text-sm text-slate-400">
+            <p
+              className={`text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Traditional education faces a critical disconnect between academic
               curriculum and rapid industry skill evolution.
             </p>
@@ -577,70 +830,138 @@ const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Problem 1: Students */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 hover:border-rose-500/30 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+            <div
+              className={`border rounded-2xl p-6 transition-all space-y-4 hover:border-sky-500/40 ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
+              }`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center">
                 <GraduationCap size={24} />
               </div>
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <GraduationCap size={20} className="text-rose-400" />
+              <h3
+                className={`text-lg font-bold flex items-center gap-2 ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
+                <GraduationCap size={20} className="text-sky-500" />
                 Students
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 &ldquo;Unclear about which skills industries actually
                 demand.&rdquo;
               </p>
-              <div className="pt-2 text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              <div
+                className={`pt-2 text-[11px] flex items-center gap-1.5 ${
+                  isDark ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
                 Lack of structured skill benchmark evaluation
               </div>
             </div>
 
             {/* Problem 2: Industry */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 hover:border-amber-500/30 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+            <div
+              className={`border rounded-2xl p-6 transition-all space-y-4 hover:border-orange-500/40 ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
+              }`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                 <Briefcase size={24} />
               </div>
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <Briefcase size={20} className="text-amber-400" />
+              <h3
+                className={`text-lg font-bold flex items-center gap-2 ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
+                <Briefcase size={20} className="text-orange-500" />
                 Industries
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 &ldquo;Difficulty finding candidates with the right
                 skills.&rdquo;
               </p>
-              <div className="pt-2 text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <div
+                className={`pt-2 text-[11px] flex items-center gap-1.5 ${
+                  isDark ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                 High screening costs & mismatch between degree and proficiency
               </div>
             </div>
 
             {/* Problem 3: Academia */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 hover:border-cyan-500/30 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <div
+              className={`border rounded-2xl p-6 transition-all space-y-4 hover:border-cyan-500/40 ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
+              }`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center">
                 <Building2 size={24} />
               </div>
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <Building2 size={20} className="text-cyan-400" />
+              <h3
+                className={`text-lg font-bold flex items-center gap-2 ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
+                <Building2 size={20} className="text-cyan-500" />
                 Academia
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 &ldquo;Limited visibility into student skill gaps and industry
                 requirements.&rdquo;
               </p>
-              <div className="pt-2 text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <div
+                className={`pt-2 text-[11px] flex items-center gap-1.5 ${
+                  isDark ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
                 Delayed placement feedback & curriculum misalignment
               </div>
             </div>
           </div>
 
           {/* Unified Solution Statement */}
-          <div className="mt-12 p-6 bg-gradient-to-r from-indigo-950/60 via-slate-900 to-indigo-950/60 border border-indigo-500/30 rounded-2xl text-center space-y-2">
-            <h3 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-cyan-300">
+          <div
+            className={`mt-12 p-6 rounded-2xl text-center space-y-2 border ${
+              isDark
+                ? "bg-gradient-to-r from-sky-950/40 via-slate-900 to-orange-950/40 border-sky-500/30"
+                : "bg-gradient-to-r from-sky-50 via-slate-50 to-orange-50 border-sky-200"
+            }`}
+          >
+            <h3
+              className={`text-xl sm:text-2xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               One platform. Three ecosystems. One common goal: career-ready
               talent.
             </h3>
-            <p className="text-xs text-slate-400 max-w-2xl mx-auto">
+            <p
+              className={`text-xs max-w-2xl mx-auto ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               SkillBridge provides the missing diagnostic layer between
               classroom education and corporate recruitment.
             </p>
@@ -652,13 +973,21 @@ const LandingPage: React.FC = () => {
       <section id="how-it-works" className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">
               Platform Workflow
             </span>
-            <h2 className="text-3xl font-black text-white">
+            <h2
+              className={`text-3xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               How SkillBridge Works
             </h2>
-            <p className="text-sm text-slate-400">
+            <p
+              className={`text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               A structured 5-step process connecting student preparation with
               industry opportunity matching.
             </p>
@@ -671,15 +1000,15 @@ const LandingPage: React.FC = () => {
                 title: "Assess Skills",
                 desc: "Evaluate technical proficiency through timed, structured assessments.",
                 icon: Brain,
-                color: "text-indigo-400",
-                bg: "bg-indigo-500/10 border-indigo-500/20",
+                color: "text-sky-500",
+                bg: "bg-sky-500/10 border-sky-500/20",
               },
               {
                 step: "02",
                 title: "Build Skill Profile",
                 desc: "Generate a verified Skill Matrix and digital portfolio showcase.",
                 icon: Award,
-                color: "text-cyan-400",
+                color: "text-cyan-500",
                 bg: "bg-cyan-500/10 border-cyan-500/20",
               },
               {
@@ -687,33 +1016,43 @@ const LandingPage: React.FC = () => {
                 title: "Analyze Skill Gaps",
                 desc: "Compare personal proficiency against real-time industry demand benchmarks.",
                 icon: BarChart3,
-                color: "text-emerald-400",
-                bg: "bg-emerald-500/10 border-emerald-500/20",
+                color: "text-amber-500",
+                bg: "bg-amber-500/10 border-amber-500/20",
               },
               {
                 step: "04",
                 title: "Discover Opportunities",
                 desc: "Explore verified internships and job postings matching your skill profile.",
                 icon: Briefcase,
-                color: "text-amber-400",
-                bg: "bg-amber-500/10 border-amber-500/20",
+                color: "text-orange-500",
+                bg: "bg-orange-500/10 border-orange-500/20",
               },
               {
                 step: "05",
                 title: "Apply & Track",
                 desc: "Submit applications directly and monitor recruitment stages in real time.",
                 icon: ClipboardList,
-                color: "text-purple-400",
-                bg: "bg-purple-500/10 border-purple-500/20",
+                color: "text-blue-500",
+                bg: "bg-blue-500/10 border-blue-500/20",
               },
             ].map((st) => (
               <div
                 key={st.step}
-                className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 group"
+                className={`border rounded-2xl p-5 transition-all flex flex-col justify-between space-y-4 group ${
+                  isDark
+                    ? "bg-slate-900/80 border-slate-800 hover:border-sky-500/40"
+                    : "bg-white border-slate-200 shadow-sm hover:border-sky-300"
+                }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-slate-400 group-hover:text-indigo-400 transition-colors">
+                    <span
+                      className={`text-2xl font-black transition-colors ${
+                        isDark
+                          ? "text-slate-600 group-hover:text-sky-400"
+                          : "text-slate-300 group-hover:text-sky-600"
+                      }`}
+                    >
                       {st.step}
                     </span>
                     <div
@@ -722,10 +1061,18 @@ const LandingPage: React.FC = () => {
                       <st.icon size={20} />
                     </div>
                   </div>
-                  <h4 className="font-bold text-slate-100 text-sm">
+                  <h4
+                    className={`font-bold text-sm ${
+                      isDark ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
                     {st.title}
                   </h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p
+                    className={`text-xs leading-relaxed ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     {st.desc}
                   </p>
                 </div>
@@ -738,27 +1085,46 @@ const LandingPage: React.FC = () => {
       {/* ================= 3.5 LIVE OPPORTUNITIES SECTION ================= */}
       <section
         id="opportunities"
-        className="py-24 bg-slate-950/60 border-t border-slate-800/80 relative overflow-hidden"
+        className={`py-24 border-t relative overflow-hidden ${
+          isDark
+            ? "bg-slate-900/60 border-slate-800"
+            : "bg-slate-100/60 border-slate-200"
+        }`}
       >
-        {/* Background decorative glow element */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-sky-500/5 blur-[120px] pointer-events-none rounded-full" />
+        <div
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] blur-[120px] pointer-events-none rounded-full ${
+            isDark ? "bg-sky-600/10" : "bg-sky-300/20"
+          }`}
+        />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-sky-400 bg-sky-500/10 px-3.5 py-1.5 rounded-full border border-sky-500/20 shadow-inner">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-sky-500 bg-sky-500/10 px-3.5 py-1.5 rounded-full border border-sky-500/20 shadow-inner">
               OPPORTUNITIES
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h2
+              className={`text-3xl sm:text-5xl font-black tracking-tight ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               Don't just learn skills.{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-cyan-400 to-orange-500">
                 Use them.
               </span>
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            <p
+              className={`text-sm sm:text-base leading-relaxed max-w-2xl mx-auto ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Discover internships, projects and early-career opportunities that
               actually match your growing skill profile.
             </p>
-            <p className="text-[11px] text-slate-400 italic font-medium pt-1">
+            <p
+              className={`text-[11px] italic font-medium pt-1 ${
+                isDark ? "text-sky-400/70" : "text-sky-700"
+              }`}
+            >
               * Live opportunities sourced dynamically from active SkillBridge
               database postings.
             </p>
@@ -766,7 +1132,7 @@ const LandingPage: React.FC = () => {
 
           {loadingDemand ? (
             <div className="py-16 text-center text-xs text-slate-400 space-y-3">
-              <div className="animate-spin w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full mx-auto shadow-lg shadow-sky-500/20" />
+              <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto shadow-lg shadow-sky-500/20" />
               <p className="font-medium tracking-wide">
                 Fetching active opportunities from SkillBridge database...
               </p>
@@ -788,21 +1154,28 @@ const LandingPage: React.FC = () => {
                     onClick={() =>
                       navigate(isAuthenticated ? "/opportunities" : "/login")
                     }
-                    className="group relative bg-slate-900/60 backdrop-blur-xl border border-slate-800/90 hover:border-sky-500/50 rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between space-y-6 cursor-pointer shadow-xl hover:shadow-[0_15px_30px_-10px_rgba(14,165,233,0.2)] overflow-hidden"
+                    className={`group relative backdrop-blur-xl border rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between space-y-6 cursor-pointer shadow-xl overflow-hidden ${
+                      isDark
+                        ? "bg-slate-900/90 border-slate-800 hover:border-sky-500/50 hover:shadow-sky-950/40"
+                        : "bg-white border-slate-200 hover:border-sky-400 hover:shadow-slate-300/60"
+                    }`}
                   >
-                    {/* Subtle top hover line accent */}
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-sky-400/0 group-hover:via-sky-400 to-transparent transition-all duration-500" />
-
                     <div className="space-y-4">
                       {/* Header Row: Company Icon & Match Score */}
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/10 border border-sky-500/30 text-sky-300 font-black flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition-transform duration-300">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 to-orange-500/10 border border-sky-500/30 text-sky-500 font-black flex items-center justify-center text-lg shadow-xs group-hover:scale-105 transition-transform duration-300">
                           {companyInitial}
                         </div>
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 bg-sky-500/10 px-3 py-1.5 rounded-full border border-sky-500/20 shadow-sm">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border shadow-xs ${
+                            isDark
+                              ? "text-sky-300 bg-sky-500/10 border-sky-500/20"
+                              : "text-sky-700 bg-sky-50 border-sky-200"
+                          }`}
+                        >
                           <Sparkles
                             size={13}
-                            className="text-sky-400 animate-pulse"
+                            className="text-orange-500 animate-pulse"
                           />
                           {matchPercent}% match
                         </span>
@@ -810,27 +1183,53 @@ const LandingPage: React.FC = () => {
 
                       {/* Role Details */}
                       <div className="space-y-1">
-                        <h3 className="text-lg font-bold text-white group-hover:text-sky-300 transition-colors line-clamp-1 tracking-tight">
+                        <h3
+                          className={`text-lg font-bold transition-colors line-clamp-1 tracking-tight ${
+                            isDark
+                              ? "text-white group-hover:text-sky-400"
+                              : "text-slate-900 group-hover:text-sky-600"
+                          }`}
+                        >
                           {roleTitle}
                         </h3>
-                        <p className="text-xs text-slate-400 font-semibold tracking-wide">
+                        <p
+                          className={`text-xs font-semibold tracking-wide ${
+                            isDark ? "text-slate-400" : "text-slate-500"
+                          }`}
+                        >
                           {companyName}
                         </p>
                       </div>
 
                       {/* Location Badge */}
-                      <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-950/40 px-3 py-2 rounded-xl border border-slate-800/60 w-fit">
-                        <MapPin size={14} className="text-sky-400 shrink-0" />
+                      <div
+                        className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border w-fit ${
+                          isDark
+                            ? "text-slate-300 bg-slate-950/60 border-slate-800"
+                            : "text-slate-700 bg-slate-100 border-slate-200"
+                        }`}
+                      >
+                        <MapPin size={14} className="text-sky-500 shrink-0" />
                         <span className="font-medium">{location}</span>
                       </div>
                     </div>
 
                     {/* Card Footer */}
-                    <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold">
-                      <span className="text-[11px] font-medium text-slate-400 group-hover:text-slate-300 tracking-wider uppercase">
+                    <div
+                      className={`pt-4 border-t flex items-center justify-between text-xs font-semibold ${
+                        isDark ? "border-slate-800" : "border-slate-200"
+                      }`}
+                    >
+                      <span className="text-[11px] font-medium text-slate-400 tracking-wider uppercase">
                         SkillBenchmarked *
                       </span>
-                      <div className="w-8 h-8 rounded-xl bg-slate-800/60 group-hover:bg-sky-500 text-slate-400 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm">
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 shadow-xs ${
+                          isDark
+                            ? "bg-slate-800 text-slate-300 group-hover:bg-sky-500 group-hover:text-white"
+                            : "bg-slate-100 text-slate-600 group-hover:bg-sky-600 group-hover:text-white"
+                        }`}
+                      >
                         <ArrowUpRight
                           size={16}
                           className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
@@ -842,22 +1241,36 @@ const LandingPage: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="text-center py-14 px-6 bg-slate-900/40 backdrop-blur-md border border-slate-800/90 rounded-3xl max-w-xl mx-auto space-y-4 shadow-2xl">
-              <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto text-sky-400">
+            <div
+              className={`text-center py-14 px-6 border rounded-3xl max-w-xl mx-auto space-y-4 shadow-2xl ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200"
+              }`}
+            >
+              <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto text-sky-500">
                 <Briefcase size={26} />
               </div>
               <div className="space-y-1">
-                <h4 className="text-base font-bold text-slate-200">
+                <h4
+                  className={`text-base font-bold ${
+                    isDark ? "text-slate-200" : "text-slate-800"
+                  }`}
+                >
                   No active opportunities in DB yet
                 </h4>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                <p
+                  className={`text-xs max-w-sm mx-auto leading-relaxed ${
+                    isDark ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
                   * Live opportunities will populate here dynamically as
                   industry partners post hiring criteria.
                 </p>
               </div>
               <button
                 onClick={() => navigate("/login")}
-                className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-sky-500/25 cursor-pointer"
+                className="px-6 py-2.5 bg-gradient-to-r from-sky-500 via-cyan-500 to-orange-500 hover:from-sky-400 hover:to-orange-400 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-sky-500/25 cursor-pointer"
               >
                 Join as Industry Partner to Post
               </button>
@@ -870,12 +1283,16 @@ const LandingPage: React.FC = () => {
                 onClick={() =>
                   navigate(isAuthenticated ? "/opportunities" : "/login")
                 }
-                className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs rounded-2xl border border-slate-700/80 hover:border-sky-500/50 transition-all cursor-pointer shadow-xl group"
+                className={`inline-flex items-center gap-2 px-8 py-3.5 font-bold text-xs rounded-2xl border transition-all cursor-pointer shadow-xl group ${
+                  isDark
+                    ? "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-sky-500/50"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 hover:border-sky-300"
+                }`}
               >
                 View All {totalPublishedOpportunities} Live DB Opportunities
                 <ArrowUpRight
                   size={16}
-                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-sky-400"
+                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-sky-500"
                 />
               </button>
             </div>
@@ -886,17 +1303,29 @@ const LandingPage: React.FC = () => {
       {/* ================= 4. WHO IS SKILLBRIDGE FOR? ================= */}
       <section
         id="who-is-it-for"
-        className="py-20 bg-slate-950/60 border-t border-slate-800/80"
+        className={`py-20 border-t ${
+          isDark
+            ? "bg-slate-900/40 border-slate-800"
+            : "bg-slate-50 border-slate-200"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-cyan-500 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
               User Roles & Value
             </span>
-            <h2 className="text-3xl font-black text-white">
+            <h2
+              className={`text-3xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               Who is SkillBridge For?
             </h2>
-            <p className="text-sm text-slate-400">
+            <p
+              className={`text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Tailored workspaces engineered specifically for students, industry
               recruiters, institutional leaders, and faculty.
             </p>
@@ -915,8 +1344,10 @@ const LandingPage: React.FC = () => {
                 onClick={() => setActiveAudienceTab(tab.id as any)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                   activeAudienceTab === tab.id
-                    ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30"
-                    : "bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200"
+                    ? "bg-gradient-to-r from-sky-500 to-cyan-600 text-white border-sky-500 shadow-md shadow-sky-500/30"
+                    : isDark
+                      ? "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+                      : "bg-white text-slate-600 border-slate-200 hover:text-slate-900 shadow-xs"
                 }`}
               >
                 <tab.icon size={16} />
@@ -925,59 +1356,75 @@ const LandingPage: React.FC = () => {
             ))}
           </div>
 
-          {/* 4 POLISHED CARDS GRID */}
+          {/* 4 CARDS GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* 1. Students Card */}
             <div
-              className={`bg-slate-900/80 border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
+              className={`border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
                 activeAudienceTab === "students"
-                  ? "border-indigo-500 ring-1 ring-indigo-500/50 shadow-xl"
-                  : "border-slate-800"
+                  ? "border-sky-500 ring-1 ring-sky-500/50 shadow-xl"
+                  : isDark
+                    ? "bg-slate-900/80 border-slate-800"
+                    : "bg-white border-slate-200 shadow-sm"
               }`}
             >
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center">
                   <GraduationCap size={26} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-100">Students</h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <h3
+                    className={`text-xl font-bold ${
+                      isDark ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
+                    Students
+                  </h3>
+                  <p
+                    className={`text-xs mt-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Accelerate your career readiness with benchmark assessments.
                   </p>
                 </div>
-                <ul className="space-y-2.5 text-xs text-slate-300">
+                <ul
+                  className={`space-y-2.5 text-xs ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-indigo-400 shrink-0 mt-0.5"
+                      className="text-sky-500 shrink-0 mt-0.5"
                     />
                     <span>Skill assessment & timed evaluations</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-indigo-400 shrink-0 mt-0.5"
+                      className="text-sky-500 shrink-0 mt-0.5"
                     />
                     <span>Personalized skill gap analysis</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-indigo-400 shrink-0 mt-0.5"
+                      className="text-sky-500 shrink-0 mt-0.5"
                     />
                     <span>Internship & job opportunity discovery</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-indigo-400 shrink-0 mt-0.5"
+                      className="text-sky-500 shrink-0 mt-0.5"
                     />
                     <span>Application status tracking</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-indigo-400 shrink-0 mt-0.5"
+                      className="text-sky-500 shrink-0 mt-0.5"
                     />
                     <span>Verified digital portfolio & certificates</span>
                   </li>
@@ -985,7 +1432,7 @@ const LandingPage: React.FC = () => {
               </div>
               <Link
                 to="/login"
-                className="w-full py-2.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 bg-sky-500/10 hover:bg-sky-500 text-sky-500 hover:text-white border border-sky-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
               >
                 Explore as Student
                 <ChevronRight size={14} />
@@ -994,58 +1441,72 @@ const LandingPage: React.FC = () => {
 
             {/* 2. Industries Card */}
             <div
-              className={`bg-slate-900/80 border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
+              className={`border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
                 activeAudienceTab === "industries"
-                  ? "border-purple-500 ring-1 ring-purple-500/50 shadow-xl"
-                  : "border-slate-800"
+                  ? "border-orange-500 ring-1 ring-orange-500/50 shadow-xl"
+                  : isDark
+                    ? "bg-slate-900/80 border-slate-800"
+                    : "bg-white border-slate-200 shadow-sm"
               }`}
             >
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
                   <Briefcase size={26} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-100">
+                  <h3
+                    className={`text-xl font-bold ${
+                      isDark ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
                     Industries
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p
+                    className={`text-xs mt-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Source pre-assessed, verified candidates directly from
                     campuses.
                   </p>
                 </div>
-                <ul className="space-y-2.5 text-xs text-slate-300">
+                <ul
+                  className={`space-y-2.5 text-xs ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-purple-400 shrink-0 mt-0.5"
+                      className="text-orange-500 shrink-0 mt-0.5"
                     />
                     <span>Register and get company verified</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-purple-400 shrink-0 mt-0.5"
+                      className="text-orange-500 shrink-0 mt-0.5"
                     />
                     <span>Post internships & full-time job openings</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-purple-400 shrink-0 mt-0.5"
+                      className="text-orange-500 shrink-0 mt-0.5"
                     />
                     <span>Specify required skill proficiencies</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-purple-400 shrink-0 mt-0.5"
+                      className="text-orange-500 shrink-0 mt-0.5"
                     />
                     <span>Review pre-screened applicants</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-purple-400 shrink-0 mt-0.5"
+                      className="text-orange-500 shrink-0 mt-0.5"
                     />
                     <span>Recruit suitable talent efficiently</span>
                   </li>
@@ -1053,7 +1514,7 @@ const LandingPage: React.FC = () => {
               </div>
               <Link
                 to="/login"
-                className="w-full py-2.5 bg-purple-500/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
               >
                 Join as Industry
                 <ChevronRight size={14} />
@@ -1062,51 +1523,65 @@ const LandingPage: React.FC = () => {
 
             {/* 3. Institutions Card */}
             <div
-              className={`bg-slate-900/80 border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
+              className={`border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
                 activeAudienceTab === "institutions"
                   ? "border-cyan-500 ring-1 ring-cyan-500/50 shadow-xl"
-                  : "border-slate-800"
+                  : isDark
+                    ? "bg-slate-900/80 border-slate-800"
+                    : "bg-white border-slate-200 shadow-sm"
               }`}
             >
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center">
                   <Building2 size={26} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-100">
+                  <h3
+                    className={`text-xl font-bold ${
+                      isDark ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
                     Institutions
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p
+                    className={`text-xs mt-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Gain macro visibility into institutional skill readiness and
                     demand.
                   </p>
                 </div>
-                <ul className="space-y-2.5 text-xs text-slate-300">
+                <ul
+                  className={`space-y-2.5 text-xs ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-cyan-400 shrink-0 mt-0.5"
+                      className="text-cyan-500 shrink-0 mt-0.5"
                     />
                     <span>Monitor student skill development</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-cyan-400 shrink-0 mt-0.5"
+                      className="text-cyan-500 shrink-0 mt-0.5"
                     />
                     <span>Analyze institutional skill readiness index</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-cyan-400 shrink-0 mt-0.5"
+                      className="text-cyan-500 shrink-0 mt-0.5"
                     />
                     <span>Track internship & placement pipeline</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-cyan-400 shrink-0 mt-0.5"
+                      className="text-cyan-500 shrink-0 mt-0.5"
                     />
                     <span>Understand real-time industry demand trends</span>
                   </li>
@@ -1114,7 +1589,7 @@ const LandingPage: React.FC = () => {
               </div>
               <Link
                 to="/login"
-                className="w-full py-2.5 bg-cyan-500/20 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-500 hover:text-white border border-cyan-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
               >
                 Join as Institution
                 <ChevronRight size={14} />
@@ -1123,58 +1598,72 @@ const LandingPage: React.FC = () => {
 
             {/* 4. Academicians Card */}
             <div
-              className={`bg-slate-900/80 border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
+              className={`border rounded-3xl p-6 transition-all space-y-6 flex flex-col justify-between ${
                 activeAudienceTab === "academicians"
                   ? "border-amber-500 ring-1 ring-amber-500/50 shadow-xl"
-                  : "border-slate-800"
+                  : isDark
+                    ? "bg-slate-900/80 border-slate-800"
+                    : "bg-white border-slate-200 shadow-sm"
               }`}
             >
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
                   <BookOpen size={26} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-100">
+                  <h3
+                    className={`text-xl font-bold ${
+                      isDark ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
                     Academicians
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p
+                    className={`text-xs mt-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Bridge research and teaching with corporate technology
                     standards.
                   </p>
                 </div>
-                <ul className="space-y-2.5 text-xs text-slate-300">
+                <ul
+                  className={`space-y-2.5 text-xs ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-amber-400 shrink-0 mt-0.5"
+                      className="text-amber-500 shrink-0 mt-0.5"
                     />
                     <span>Faculty opportunity discovery</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-amber-400 shrink-0 mt-0.5"
+                      className="text-amber-500 shrink-0 mt-0.5"
                     />
                     <span>Faculty Development Programs (FDPs)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-amber-400 shrink-0 mt-0.5"
+                      className="text-amber-500 shrink-0 mt-0.5"
                     />
                     <span>Industry training & exposure</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-amber-400 shrink-0 mt-0.5"
+                      className="text-amber-500 shrink-0 mt-0.5"
                     />
                     <span>Research collaboration & mentorship</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2
                       size={15}
-                      className="text-amber-400 shrink-0 mt-0.5"
+                      className="text-amber-500 shrink-0 mt-0.5"
                     />
                     <span>Direct industry interaction</span>
                   </li>
@@ -1182,7 +1671,7 @@ const LandingPage: React.FC = () => {
               </div>
               <Link
                 to="/login"
-                className="w-full py-2.5 bg-amber-500/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white border border-amber-500/30 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
               >
                 Explore Academia
                 <ChevronRight size={14} />
@@ -1196,13 +1685,21 @@ const LandingPage: React.FC = () => {
       <section id="features" className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">
               Platform Modules
             </span>
-            <h2 className="text-3xl font-black text-white">
+            <h2
+              className={`text-3xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               Core Platform Capabilities
             </h2>
-            <p className="text-sm text-slate-400">
+            <p
+              className={`text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Built on verified data pipelines, robust assessments, and
               transparent skill analytics.
             </p>
@@ -1214,72 +1711,86 @@ const LandingPage: React.FC = () => {
                 title: "Skill Assessment",
                 desc: "Evaluate technical and soft skills through structured assessments.",
                 icon: Brain,
-                color: "text-indigo-400",
-                bg: "bg-indigo-500/10 border-indigo-500/20",
+                color: "text-sky-500",
+                bg: "bg-sky-500/10 border-sky-500/20",
               },
               {
                 title: "Skill Gap Analysis",
                 desc: "Compare student proficiency with actual industry skill demand.",
                 icon: BarChart3,
-                color: "text-cyan-400",
+                color: "text-cyan-500",
                 bg: "bg-cyan-500/10 border-cyan-500/20",
               },
               {
                 title: "Industry Demand",
                 desc: "Understand which skills are currently required across available opportunities.",
                 icon: Target,
-                color: "text-emerald-400",
-                bg: "bg-emerald-500/10 border-emerald-500/20",
+                color: "text-amber-500",
+                bg: "bg-amber-500/10 border-amber-500/20",
               },
               {
                 title: "Internships & Jobs",
                 desc: "Discover and apply for relevant opportunities.",
                 icon: Briefcase,
-                color: "text-amber-400",
-                bg: "bg-amber-500/10 border-amber-500/20",
+                color: "text-orange-500",
+                bg: "bg-orange-500/10 border-orange-500/20",
               },
               {
                 title: "Application Tracking",
                 desc: "Track applications and recruitment progress.",
                 icon: ClipboardList,
-                color: "text-purple-400",
-                bg: "bg-purple-500/10 border-purple-500/20",
+                color: "text-blue-500",
+                bg: "bg-blue-500/10 border-blue-500/20",
               },
               {
                 title: "Digital Portfolio",
                 desc: "Showcase verified skills, certifications, projects and achievements.",
                 icon: Award,
-                color: "text-pink-400",
-                bg: "bg-pink-500/10 border-pink-500/20",
+                color: "text-sky-500",
+                bg: "bg-sky-500/10 border-sky-500/20",
               },
               {
                 title: "Academia–Industry Collaboration",
                 desc: "Enable interaction between students, institutions, academicians and industry.",
                 icon: Users,
-                color: "text-blue-400",
-                bg: "bg-blue-500/10 border-blue-500/20",
+                color: "text-cyan-500",
+                bg: "bg-cyan-500/10 border-cyan-500/20",
               },
               {
                 title: "Institutional Analytics",
                 desc: "Help institutions understand student readiness and industry requirements.",
                 icon: TrendingUp,
-                color: "text-teal-400",
-                bg: "bg-teal-500/10 border-teal-500/20",
+                color: "text-amber-500",
+                bg: "bg-amber-500/10 border-amber-500/20",
               },
             ].map((feat) => (
               <div
                 key={feat.title}
-                className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 hover:border-slate-700 transition-all space-y-4 group"
+                className={`border rounded-2xl p-6 transition-all space-y-4 group ${
+                  isDark
+                    ? "bg-slate-900/80 border-slate-800 hover:border-sky-500/40"
+                    : "bg-white border-slate-200 shadow-sm hover:border-sky-300"
+                }`}
               >
                 <div
                   className={`w-12 h-12 rounded-xl border flex items-center justify-center ${feat.bg} ${feat.color}`}
                 >
                   <feat.icon size={22} />
                 </div>
-                <h4 className="font-bold text-slate-100 text-base group-hover:text-indigo-400 transition-colors">
+                <h4
+                  className={`font-bold text-base transition-colors ${
+                    isDark
+                      ? "text-slate-100 group-hover:text-sky-400"
+                      : "text-slate-900 group-hover:text-sky-600"
+                  }`}
+                >
                   {feat.title}
                 </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p
+                  className={`text-xs leading-relaxed ${
+                    isDark ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
                   {feat.desc}
                 </p>
               </div>
@@ -1291,31 +1802,57 @@ const LandingPage: React.FC = () => {
       {/* ================= 6. INDUSTRY DEMAND SECTION ================= */}
       <section
         id="industry-demand"
-        className="py-20 bg-slate-950/60 border-t border-slate-800/80 relative"
+        className={`py-20 border-t relative ${
+          isDark
+            ? "bg-slate-900/60 border-slate-800"
+            : "bg-slate-100/60 border-slate-200"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             <div className="max-w-xl space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
                 Live Data Aggregation
               </span>
-              <h2 className="text-3xl font-black text-white">
+              <h2
+                className={`text-3xl font-black ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
                 What Skills Does Industry Need?
               </h2>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p
+                className={`text-sm leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 SkillBridge derives industry demand directly from the skills
                 requested in active industry opportunities posted on the
                 platform.
               </p>
-              <p className="text-[11px] text-indigo-300/80 italic font-medium">
+              <p
+                className={`text-[11px] italic font-medium ${
+                  isDark ? "text-sky-400/80" : "text-sky-700"
+                }`}
+              >
                 * Data is dynamically calculated from active postings stored in
                 the SkillBridge database.
               </p>
-              <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-xl space-y-2 text-xs text-slate-300">
-                <div className="flex items-center gap-2 font-semibold text-indigo-300">
+              <div
+                className={`p-4 rounded-xl space-y-2 text-xs border ${
+                  isDark
+                    ? "bg-slate-900/90 border-slate-800 text-slate-300"
+                    : "bg-white border-slate-200 text-slate-700 shadow-sm"
+                }`}
+              >
+                <div className="flex items-center gap-2 font-semibold text-sky-500">
                   <ShieldCheck size={16} /> Transparent Demand Calculation
                 </div>
-                <p className="text-slate-400 text-[11px]">
+                <p
+                  className={`text-[11px] ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
                   Frequencies update dynamically as corporate partners publish
                   internship and employment openings.
                 </p>
@@ -1324,13 +1861,33 @@ const LandingPage: React.FC = () => {
 
             {/* DEMAND SKILLS VISUALIZATION */}
             <div className="w-full lg:w-[500px]">
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <span className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                    <Target size={16} className="text-amber-400" />
+              <div
+                className={`border rounded-3xl p-6 shadow-xl space-y-5 ${
+                  isDark
+                    ? "bg-slate-900/90 border-slate-800"
+                    : "bg-white border-slate-200"
+                }`}
+              >
+                <div
+                  className={`flex items-center justify-between border-b pb-3 ${
+                    isDark ? "border-slate-800" : "border-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
+                      isDark ? "text-slate-200" : "text-slate-800"
+                    }`}
+                  >
+                    <Target size={16} className="text-amber-500" />
                     Industry Skill Demand Index
                   </span>
-                  <span className="text-[11px] text-slate-400 font-semibold bg-slate-800 px-2.5 py-0.5 rounded-full">
+                  <span
+                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                      isDark
+                        ? "text-sky-300 bg-slate-950 border-slate-800"
+                        : "text-sky-700 bg-sky-50 border-sky-200"
+                    }`}
+                  >
                     {totalPublishedOpportunities > 0
                       ? `${totalPublishedOpportunities} Active Postings`
                       : "Live Telemetry"}
@@ -1339,7 +1896,7 @@ const LandingPage: React.FC = () => {
 
                 {loadingDemand ? (
                   <div className="py-8 text-center text-xs text-slate-400 space-y-2">
-                    <div className="animate-spin w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto" />
+                    <div className="animate-spin w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
                     <p>Loading real-time skill demand from backend...</p>
                   </div>
                 ) : demandSkills.length > 0 ? (
@@ -1347,14 +1904,26 @@ const LandingPage: React.FC = () => {
                     {demandSkills.map((sk) => (
                       <div key={sk.name} className="space-y-1.5">
                         <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-200">{sk.name}</span>
-                          <span className="text-indigo-400 font-bold">
+                          <span
+                            className={
+                              isDark ? "text-slate-200" : "text-slate-800"
+                            }
+                          >
+                            {sk.name}
+                          </span>
+                          <span className="text-sky-500 font-bold">
                             {sk.percentage}% Demand
                           </span>
                         </div>
-                        <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div
+                          className={`w-full rounded-full h-2 overflow-hidden border ${
+                            isDark
+                              ? "bg-slate-950 border-slate-800"
+                              : "bg-slate-100 border-slate-200"
+                          }`}
+                        >
                           <div
-                            className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-2 rounded-full transition-all duration-500"
+                            className="bg-gradient-to-r from-sky-500 via-cyan-400 via-amber-400 to-orange-500 h-2 rounded-full transition-all duration-500"
                             style={{
                               width: `${Math.min(100, Math.max(15, sk.percentage))}%`,
                             }}
@@ -1364,12 +1933,26 @@ const LandingPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="py-6 text-center space-y-2 bg-slate-950/40 rounded-2xl p-4 border border-slate-800">
-                    <p className="text-xs font-semibold text-slate-300">
+                  <div
+                    className={`py-6 text-center space-y-2 rounded-2xl p-4 border ${
+                      isDark
+                        ? "bg-slate-950/60 border-slate-800"
+                        : "bg-slate-50 border-slate-200"
+                    }`}
+                  >
+                    <p
+                      className={`text-xs font-semibold ${
+                        isDark ? "text-slate-300" : "text-slate-700"
+                      }`}
+                    >
                       SkillBridge derives industry demand from the skills
                       requested in industry opportunities.
                     </p>
-                    <p className="text-[11px] text-slate-400">
+                    <p
+                      className={`text-[11px] ${
+                        isDark ? "text-slate-400" : "text-slate-500"
+                      }`}
+                    >
                       Top skills will populate live as recruiters publish new
                       opportunity criteria.
                     </p>
@@ -1385,55 +1968,105 @@ const LandingPage: React.FC = () => {
       <section id="verified-ecosystem" className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-500 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
               Ecosystem Integrity
             </span>
-            <h2 className="text-3xl font-black text-white">
+            <h2
+              className={`text-3xl font-black ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               Built for a Trusted Ecosystem
             </h2>
-            <p className="text-sm text-slate-400">
+            <p
+              className={`text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Industries can register on SkillBridge, while verification helps
               maintain a reliable recruitment ecosystem.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 font-bold flex items-center justify-center border border-slate-700 text-sm">
+            <div
+              className={`border rounded-2xl p-6 space-y-3 ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 font-bold flex items-center justify-center border border-sky-500/20 text-sm">
                 01
               </div>
-              <h4 className="font-bold text-slate-100 text-base">
+              <h4
+                className={`font-bold text-base ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
                 Corporate Registration
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 Organizations create official profiles with corporate
                 documentation and industry category verification.
               </p>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 font-bold flex items-center justify-center border border-indigo-500/20 text-sm">
+            <div
+              className={`border rounded-2xl p-6 space-y-3 ${
+                isDark
+                  ? "bg-slate-900/80 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-500 font-bold flex items-center justify-center border border-cyan-500/20 text-sm">
                 02
               </div>
-              <h4 className="font-bold text-slate-100 text-base">
+              <h4
+                className={`font-bold text-base ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
                 Admin Audit & Review
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
                 Platform administrators audit company details to ensure
                 legitimacy before granting publishing privileges.
               </p>
             </div>
 
-            <div className="bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center border border-emerald-500/20 text-sm">
+            <div
+              className={`border rounded-2xl p-6 space-y-3 ${
+                isDark
+                  ? "bg-slate-900/80 border-orange-500/30"
+                  : "bg-white border-orange-200 shadow-sm"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 font-bold flex items-center justify-center border border-orange-500/20 text-sm">
                 03
               </div>
-              <h4 className="font-bold text-slate-100 text-base">
+              <h4
+                className={`font-bold text-base ${
+                  isDark ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
                 Verified Hiring Partner
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Verified companies access candidate Skill Matrix profiles and post
-                pre-screened campus recruitment opportunities.
+              <p
+                className={`text-xs leading-relaxed ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
+                Verified companies access candidate Skill Matrix profiles and
+                post pre-screened campus recruitment opportunities.
               </p>
             </div>
           </div>
@@ -1443,18 +2076,30 @@ const LandingPage: React.FC = () => {
       {/* ================= 8. FINAL CTA ================= */}
       <section
         id="get-started"
-        className="py-20 bg-gradient-to-b from-slate-950 to-[#0b1120] border-t border-slate-800/80 relative"
+        className={`py-20 border-t relative ${
+          isDark
+            ? "bg-gradient-to-b from-slate-900 to-[#0b1329] border-slate-800"
+            : "bg-gradient-to-b from-slate-100 to-sky-50 border-slate-200"
+        }`}
       >
         <div className="max-w-5xl mx-auto px-4 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-            <Sparkles size={14} /> Join SkillBridge Today
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/25 text-sky-500 text-xs font-semibold">
+            Join SkillBridge Today
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+          <h2
+            className={`text-3xl sm:text-4xl lg:text-5xl font-black leading-tight ${
+              isDark ? "text-white" : "text-slate-900"
+            }`}
+          >
             Build skills. Close gaps. Connect with industry.
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto font-normal">
+          <p
+            className={`text-sm sm:text-base max-w-2xl mx-auto font-normal ${
+              isDark ? "text-slate-300" : "text-slate-600"
+            }`}
+          >
             Turn your skills into opportunities with SkillBridge. The unified
             platform empowering students, institutions, and industry recruiters.
           </p>
@@ -1462,7 +2107,7 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
               to="/login"
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r bg-sky-500 hover:bg-sky-700 hover:text-white text-white font-bold text-sm rounded-xl shadow-xl shadow-sky-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               Get Started Now
               <ArrowRight size={16} />
@@ -1470,7 +2115,11 @@ const LandingPage: React.FC = () => {
 
             <Link
               to="/login"
-              className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-sm rounded-xl border border-slate-800 transition-all flex items-center justify-center gap-2"
+              className={`w-full sm:w-auto px-8 py-3.5 font-semibold text-sm rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                isDark
+                  ? "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-800"
+                  : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-xs"
+              }`}
             >
               Sign In
             </Link>
@@ -1479,26 +2128,40 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer className="bg-slate-950 border-t border-slate-800/80 py-12 text-slate-400 text-xs">
+      <footer className="bg-[#060b18] border-t border-slate-800 py-12 text-slate-400 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 pb-12 border-b border-slate-800/80">
-            {/* Brand Column */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 pb-10 border-b border-slate-800/80">
+            {/* Brand & Attribution Column */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
                 <img
                   src="/skillbridge_logo.png"
                   alt="SkillBridge Logo"
-                  className="w-8 h-8 rounded-lg object-cover border border-indigo-500/20"
+                  className="w-8 h-8 rounded-lg object-cover border border-sky-500/30"
                 />
-                <span className="text-lg font-black text-white">
+                <span className="text-xl font-black text-white tracking-tight">
                   SkillBridge
                 </span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-                Bridging Academia and Industry Through Skills. Dedicated to
-                skill assessment, curriculum alignment, and transparent
-                recruitment telemetry.
+              <p className="text-xs text-slate-300 font-medium leading-relaxed max-w-sm">
+                Portal for Academia–Industry Collaboration for Skill Mapping,
+                Internships &amp; Placement
               </p>
+              <div className="pt-2 space-y-2 border-t border-slate-900">
+                <p className="text-xs font-bold text-sky-400">
+                  Built by Team CipherX
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 font-medium">
+                  <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-200 font-semibold">
+                    Smart India Hackathon 2026
+                  </span>
+                  <span>&bull;</span>
+                  <span>
+                    Problem Statement:{" "}
+                    <strong className="text-slate-200">26044</strong>
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Platform Links */}
@@ -1510,7 +2173,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <button
                     onClick={() => scrollToSection("hero")}
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors cursor-pointer"
                   >
                     Home
                   </button>
@@ -1518,7 +2181,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <button
                     onClick={() => scrollToSection("how-it-works")}
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors cursor-pointer"
                   >
                     How It Works
                   </button>
@@ -1526,7 +2189,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <button
                     onClick={() => scrollToSection("features")}
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors cursor-pointer"
                   >
                     Features
                   </button>
@@ -1534,7 +2197,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <button
                     onClick={() => scrollToSection("industry-demand")}
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors cursor-pointer"
                   >
                     Skill Demand
                   </button>
@@ -1551,7 +2214,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     For Students
                   </Link>
@@ -1559,7 +2222,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     For Industry
                   </Link>
@@ -1567,7 +2230,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     For Institutions
                   </Link>
@@ -1575,7 +2238,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     For Academicians
                   </Link>
@@ -1592,7 +2255,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     Sign In
                   </Link>
@@ -1600,7 +2263,7 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     Create Account
                   </Link>
@@ -1608,24 +2271,40 @@ const LandingPage: React.FC = () => {
                 <li>
                   <Link
                     to="/opportunities"
-                    className="hover:text-indigo-400 transition-colors"
+                    className="hover:text-sky-400 transition-colors"
                   >
                     Public Opportunities
                   </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/dipanjan2907/Skill_Bridge_SIH"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-sky-400 transition-colors flex items-center gap-1"
+                  >
+                    GitHub Repository
+                  </a>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
-            <p>
-              &copy; {new Date().getFullYear()} SkillBridge. All rights
-              reserved. Academia &bull; Industry Convergence Platform.
-            </p>
-            <p className="flex items-center gap-1">
-              <span>
-                Powered by Real-Time Telemetry & Skill Assessment Engine
-              </span>
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 font-medium">
+            <p>&copy; 2026 Team CipherX. All Rights Reserved.</p>
+            <p className="flex flex-wrap items-center gap-1.5 text-slate-400">
+              <span>Developed for Smart India Hackathon 2026</span>
+              <span>&bull;</span>
+              <span>Problem Statement 26044</span>
+              <span>&bull;</span>
+              <a
+                href="https://github.com/dipanjan2907/Skill_Bridge_SIH"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-400 hover:text-sky-300 underline font-semibold transition-colors"
+              >
+                GitHub Repository
+              </a>
             </p>
           </div>
         </div>
