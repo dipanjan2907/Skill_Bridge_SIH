@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import StudentDetails from "./pages/student/StudentDetails";
 import IndustryProfilePage from "./pages/industry/IndustryProfile";
 import IndustryOpportunities from "./pages/industry/IndustryOpportunities";
+import IndustryQuestionPage from "./pages/industry/IndustryQuestionPage";
 import StudentOpportunities from "./pages/student/StudentOpportunities";
 import StudentApplicationsPage from "./pages/student/StudentApplications";
 import IndustryDemandReport from "./pages/student/IndustryDemandReport";
@@ -21,6 +22,7 @@ import ComingSoonPage from "./pages/ComingSoon";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import InstitutionDashboard from "./pages/institution/InstitutionDashboard";
 import InstitutionStudents from "./pages/institution/InstitutionStudents";
+import InstitutionQuestionPage from "./pages/institution/InstitutionQuestionPage";
 import CollaborationsPage from "./pages/collaborations/CollaborationsPage";
 import Auth from "./pages/Auth";
 import LandingPage from "./pages/LandingPage";
@@ -163,6 +165,16 @@ function App() {
               }
             />
 
+            {/* Protected Industry Question Bank Route */}
+            <Route
+              path="/industry/questions"
+              element={
+                <ProtectedRoute>
+                  <IndustryQuestionPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Protected Student / Public Opportunities Route */}
             <Route
               path="/opportunities"
@@ -297,6 +309,16 @@ function App() {
               element={
                 <InstitutionRoute>
                   <InstitutionStudents />
+                </InstitutionRoute>
+              }
+            />
+
+            {/* Protected Institution Question Bank Route */}
+            <Route
+              path="/institution/questions"
+              element={
+                <InstitutionRoute>
+                  <InstitutionQuestionPage />
                 </InstitutionRoute>
               }
             />

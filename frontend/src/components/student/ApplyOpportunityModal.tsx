@@ -26,6 +26,16 @@ export const ApplyOpportunityModal: React.FC<ApplyOpportunityModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Reset form and error state whenever modal is opened or target opportunity changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      setSuccessMsg(null);
+      setCoverLetter("");
+      setResumeUrl("");
+    }
+  }, [isOpen, opportunity?.id]);
+
   if (!isOpen || !opportunity) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {

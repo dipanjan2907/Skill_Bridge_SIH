@@ -388,16 +388,16 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
               {(targetAudience === "STUDENT" || targetAudience === "BOTH") && (
                 <optgroup label="Student Opportunities" className="bg-slate-900 text-slate-400">
                   <option value="internship" className="bg-slate-900 text-slate-100 py-2">
-                    🎓 Student Internship
+                    Student Internship
                   </option>
                   <option value="job" className="bg-slate-900 text-slate-100 py-2">
-                    💼 Full-Time Job
+                    Full-Time Job
                   </option>
                   <option value="project" className="bg-slate-900 text-slate-100 py-2">
-                    💻 Industry Project
+                    Industry Project
                   </option>
                   <option value="apprenticeship" className="bg-slate-900 text-slate-100 py-2">
-                    🛠️ Apprenticeship
+                    Apprenticeship
                   </option>
                 </optgroup>
               )}
@@ -405,22 +405,22 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
               {(targetAudience === "ACADEMICIAN" || targetAudience === "BOTH") && (
                 <optgroup label="Academician & Faculty Opportunities" className="bg-slate-900 text-slate-400">
                   <option value="faculty_internship" className="bg-slate-900 text-slate-100 py-2">
-                    👨‍🏫 Faculty Internship
+                    Faculty Internship
                   </option>
                   <option value="industrial_training" className="bg-slate-900 text-slate-100 py-2">
-                    🏭 Industrial Training for Faculty
+                    Industrial Training for Faculty
                   </option>
                   <option value="fdp" className="bg-slate-900 text-slate-100 py-2">
-                    📚 Faculty Development Program (FDP)
+                    Faculty Development Program (FDP)
                   </option>
                   <option value="consultancy" className="bg-slate-900 text-slate-100 py-2">
-                    💡 Industry Consultancy Project
+                    Industry Consultancy Project
                   </option>
                   <option value="research_collaboration" className="bg-slate-900 text-slate-100 py-2">
-                    🔬 Joint Research Collaboration
+                    Joint Research Collaboration
                   </option>
                   <option value="guest_lecture" className="bg-slate-900 text-slate-100 py-2">
-                    🎙️ Guest Lecture / Keynote Session
+                    Guest Lecture / Keynote Session
                   </option>
                 </optgroup>
               )}

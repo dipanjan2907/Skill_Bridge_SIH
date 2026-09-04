@@ -6,6 +6,7 @@
 
 [![SIH 2026](https://img.shields.io/badge/SIH-2026-blueviolet?style=for-the-badge&logo=gov.in)](https://sih.gov.in)
 [![Problem Statement ID](https://img.shields.io/badge/SIH%20Problem%20ID-26044-orange?style=for-the-badge)](https://sih.gov.in)
+[![Theme](https://img.shields.io/badge/Theme-Smart%20Automation-06B6D4?style=for-the-badge)]()
 [![Project Status](https://img.shields.io/badge/Status-Fully%20Functional%20%2F%20Production%20Ready-success?style=for-the-badge)]()
 
 [![React](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite-61DAFB?style=flat-square&logo=react)](https://react.dev/)
@@ -31,447 +32,484 @@
 
 - [1. Project Overview](#1-project-overview)
 - [2. Problem Statement](#2-problem-statement)
-- [3. Our Solution](#3-our-solution)
-- [4. Core Features by Role](#4-core-features-by-role)
+- [3. Key Features by Role](#3-key-features-by-role)
   - [Student Module](#student-module)
   - [Industry Partner Module](#industry-partner-module)
-  - [Academic Institution Module](#academic-institution-module)
   - [Faculty / Academician Module](#faculty--academician-module)
+  - [Academic Institution Module](#academic-institution-module)
   - [Admin Governance Module](#admin-governance-module)
-- [5. Skill Assessment System](#5-skill-assessment-system)
-- [6. Skill Gap Analysis & Target Readiness](#6-skill-gap-analysis--target-readiness)
-- [7. Industry Demand Engine](#7-industry-demand-engine)
-- [8. Skill-Based Opportunity Matching Engine](#8-skill-based-opportunity-matching-engine)
-- [9. Internship & Placement System](#9-internship--placement-system)
-- [10. Academia–Industry Collaboration Hub](#10-academiaindustry-collaboration-hub)
-- [11. Verification & Trust Model](#11-verification--trust-model)
-- [12. Role-Based Access Control (RBAC)](#12-role-based-access-control-rbac)
-- [13. System Architecture](#13-system-architecture)
-- [14. Database Schema & Data Models](#14-database-schema--data-models)
+- [4. Skill Assessment System](#4-skill-assessment-system)
+- [5. Smart Question Selection Engine](#5-smart-question-selection-engine)
+- [6. Shared Question Contribution Pool](#6-shared-question-contribution-pool)
+- [7. Admin Question Moderation Console](#7-admin-question-moderation-console)
+- [8. Question Bank Summary & Skill Configuration](#8-question-bank-summary--skill-configuration)
+- [9. Skill Management & Dynamic Requests](#9-skill-management--dynamic-requests)
+- [10. Skill-Based Opportunity Matching Engine](#10-skill-based-opportunity-matching-engine)
+- [11. Application Management & Recruitment Pipeline](#11-application-management--recruitment-pipeline)
+- [12. Student Digital Portfolio](#12-student-digital-portfolio)
+- [13. Role-Based Access Control (RBAC)](#13-role-based-access-control-rbac)
+- [14. Smart Automation Architecture](#14-smart-automation-architecture)
 - [15. Technology Stack](#15-technology-stack)
-- [16. Repository Structure](#16-repository-structure)
-- [17. Installation & Local Setup Guide](#17-installation--local-setup-guide)
+- [16. Database Architecture](#16-database-architecture)
+- [17. API & Backend Architecture](#17-api--backend-architecture)
+- [18. Project Structure](#18-project-structure)
+- [19. Environment Variables](#19-environment-variables)
+- [20. Installation & Local Setup Guide](#20-installation--local-setup-guide)
+- [21. Deployment Architecture](#21-deployment-architecture)
+- [22. Future Enhancements](#22-future-enhancements)
+- [23. Hackathon / SIH Relevance](#23-hackathon--sih-relevance)
 
 ---
 
 ## 1. Project Overview
 
-**SkillBridge** is an enterprise-grade, centralized **Academia–Industry Collaboration Ecosystem** designed to bridge the structural divide between higher education curricula and real-world industrial expectations. 
+**SkillBridge** is a centralized, multi-stakeholder **Academia–Industry Collaboration Platform** built to systematically solve the skill mismatch between university graduates and real-world industrial demands. 
 
-Unlike traditional job portals that rely solely on self-reported resume text, SkillBridge operates as a verified skill ecosystem:
-1. Students prove their competency through **interactive technical skill assessments**.
-2. Industry partners publish internships, placements, and collaboration initiatives with explicit **skill proficiency benchmarks**.
-3. An automated **Skill Matching & Gap Analysis Engine** calculates candidate compatibility percentages, highlights missing competencies, and generates actionable career development roadmaps.
-4. Educational institutions gain real-time visibility into their student body's verified skill proficiencies and industry readiness metrics.
+The platform unites five primary ecosystem stakeholders:
+* **Students:** Seek objective skill evaluation, career direction, gap analysis, and skill-matched opportunities.
+* **Industries:** Seek verified talent, publish skill-targeted opportunities, and contribute to shared assessment banks.
+* **Faculty / Academicians:** Host collaboration initiatives (FDPs, workshops, research) and contribute technical evaluation questions.
+* **Institutions:** Monitor student skill readiness, department analytics, and industry placement alignment.
+* **Administrators:** Oversee verification, platform governance, skill registries, and assessment quality control.
 
+SkillBridge powers an automated 8-stage lifecycle:
+```text
+Assess → Profile → Identify Skill Gaps → Recommend → Match → Apply → Track → Analyze
 ```
-+-----------------+      +-----------------------+      +-----------------------+
-|     Student     | ---> | Verified Assessment   | ---> |  Skill Gap Analysis   |
-| (Career Seeker) |      | (Server-Side Evaluated)|      | (Readiness Benchmark) |
-+-----------------+      +-----------------------+      +-----------------------+
-                                                                    |
-                                                                    v
-+-----------------+      +-----------------------+      +-----------------------+
-|    Industry     | ---> | Opportunity & Collab  | <--- |  Skill Match Engine   |
-| (Career Creator)|      | (Skill-Based Demands) |      | (Percentage Scoring)  |
-+-----------------+      +-----------------------+      +-----------------------+
-```
+
+Through **intelligent rule-based matching**, **dynamic demand aggregation**, and **automated proficiency scoring**, SkillBridge replaces subjective self-reported resumes with verified competency data.
 
 ---
 
 ## 2. Problem Statement
 
-### SIH Problem Statement ID: 26044
-> **Title:** Portal for Academia – Industry Collaboration for Skill Mapping, Internships and Placement
+### SIH 2026 Problem Statement ID: 26044
+> **Title:** Portal for Academia – Industry Collaboration for Skill Mapping, Internships and Placement  
+> **Theme:** Smart Automation
 
-### The Core Challenges
-* **Fragmented Skill Visibility:** Academic transcripts record course grades rather than verified technical competencies (e.g. React, Docker, SQL, Machine Learning).
-* **Subjective Self-Reporting:** Candidates submit generic resumes without objective proof of proficiency, increasing screening overhead for recruiters.
-* **Opaque Skill Gaps:** Students lack quantitative feedback explaining why they were rejected or which specific skills they need to improve to meet target hiring criteria.
-* **Isolated Institutional Monitoring:** Colleges and universities lack real-time dashboards to track overall student employability, department skill distribution, and industry alignment.
-* **Siloed Academia–Industry Interaction:** Guest lectures, industrial workshops, joint research, and mentorship programs are conducted informally without centralized participant tracking or skill mapping.
+### Ecosystem Challenges Addressed
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                 THE SKILL GAP CRISIS                             │
+├───────────────────────────────┬──────────────────────────────────────────────────┤
+│ Stakeholder                   │ Core Pain Points Addressed                       │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ Students                      │ • Lack visibility into real industry skill demands│
+│                               │ • Rely on unverified self-reported resumes       │
+│                               │ • Do not know their exact technical skill gaps   │
+│                               │ • Struggle to find relevant internships/jobs     │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ Industry Partners             │ • Manual resume screening yields poor candidate fit │
+│                               │ • High applicant volume with unverified skills   │
+│                               │ • Inefficient evaluation and shortlisting flow   │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ Faculty & Academicians        │ • Limited structured industry exposure            │
+│                               │ • Few avenues for industry-backed training (FDP) │
+│                               │ • Informal, unmonitored mentorship channels      │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ Academic Institutions         │ • No real-time analytics on student skill readiness│
+│                               │ • Inability to track overall placement alignment │
+│                               │ • Lack of centralized industry partner management │
+└───────────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+SkillBridge bridges these gaps by serving as a single source of truth for verified skills, opportunities, and academia–industry interactions.
 
 ---
 
-## 3. Our Solution
-
-SkillBridge directly addresses each challenge with verified data models and server-enforced business logic:
-
-| Challenge | SkillBridge Solution | System Implementation |
-| :--- | :--- | :--- |
-| **Skill Uncertainty** | Verified Skill Assessment System | Interactive MCQ engine with server-side evaluation, dynamic scoring (0–100%), and badge issuance. |
-| **Skill Mismatch** | Skill Gap & Readiness Engine | Compares student proficiency against aggregate industry demand to generate personalized improvement recommendations. |
-| **Opaque Market Demand** | Real-Time Industry Demand Insights | Aggregates required skills across all active hiring postings to display top-demanded competencies and target proficiencies. |
-| **Candidate Screening Overhead** | Skill-Based Matching Engine | Computes exact candidate-opportunity compatibility scores ($\%$) and skill breakdown matrices for recruiters. |
-| **Application Tracking** | Application Lifecycle Management | Multi-stage pipeline (`pending` $\rightarrow$ `shortlisted` $\rightarrow$ `accepted` / `rejected`) with cover letters and verified portfolios. |
-| **Siloed Industry Interactions** | Academia–Industry Collaboration Hub | Structured portal for Mentorships, Workshops, Live Projects, Guest Lectures, Hackathons, and Faculty Training. |
-| **Institutional Blindspots** | Institution Analytics Roster | Departmental and degree-level filtering of student rosters with verified CGPA, skills, and readiness scores. |
-| **Trust & Accountability** | Admin Verification & RBAC | Multi-tier approval workflow for industry and institution accounts before granting publishing permissions. |
-
----
-
-## 4. Core Features by Role
+## 3. Key Features by Role
 
 ### Student Module
-* **Authentication & Profile:** JWT-based signup/login, profile management, degree, department, CGPA, bio, and location tracking.
-* **Digital Skill Portfolio:** Interactive view of verified skills, proficiency levels, earning sources ("Verified Assessment" vs "Self Reported"), and skill badge indicators.
-* **Interactive Skill Assessments:** Take timed technical assessments across frontend, backend, database, and programming domains.
-* **Skill Gap Analysis:** View overall industry readiness score ($\%$), categorized skill status (*Strong*, *Needs Improvement*, *Critical Gap*), and personalized study advice.
-* **Industry Demand Reports:** Discover top-demanded skills across active industry postings with target proficiency benchmarks.
-* **Opportunity Discovery & Match Scoring:** Browse internships and jobs with real-time match breakdown (`Excellent`, `Good`, `Moderate`, `Low`) based on current assessed skills.
-* **Application Management:** Submit applications with cover letters and tracking status (`pending`, `shortlisted`, `accepted`, `rejected`).
-* **Projects & Certifications:** Record personal/academic projects with repository URLs and professional certifications.
-* **Collaboration Participation:** Discover and register for industry-led workshops, guest lectures, hackathons, and mentorship programs.
+* **Secure Auth & Profile Management:** JWT login/signup, academic profile (degree, department, semester, CGPA, graduation year).
+* **Interactive Skill Assessments:** Take technical assessments linked to specific DB skills.
+* **Automated Proficiency Scoring:** Server-side calculated score ($0\% - 100\%$) and automated badge issuance ($\ge 70\%$).
+* **Skill Gap Analysis:** Quantitative readiness index ($\%$), skill categorization (*Strong*, *Needs Improvement*, *Critical Gap*), and actionable advice.
+* **Industry Demand Insights:** Real-time demand frequency and benchmark target proficiencies across active industry postings.
+* **Algorithmic Opportunity Discovery:** Browse opportunities with real-time match scoring (`Excellent`, `Good`, `Moderate`, `Low Match`).
+* **Application Management:** Submit applications with uploaded resume and tracking status (`pending`, `shortlisted`, `accepted`, `rejected`).
+* **Digital Portfolio:** Verified skills badges, certifications, personal/academic projects, work experience history, and social links (GitHub, LinkedIn, Portfolio).
+* **Collaboration Participation:** Register for mentorships, workshops, guest lectures, hackathons, and live industry projects.
 
 ### Industry Partner Module
-* **Verification Workflow:** Immediate account access upon registration; privileged actions (posting jobs/collaborations) unlocked upon Admin verification (`verification_status = 'approved'`).
-* **Company Profile Management:** Maintain company branding, logo, website, corporate bio, industry type, and headquarters location.
-* **Opportunity Management:** Create, update, and manage job/internship postings with work mode (`Online`, `Offline`, `Hybrid`), stipend/salary ranges, deadlines, and required skill proficiencies.
-* **Custom & Master Skill Creation:** Create and add new master skills directly to the platform database (`POST /api/skills`) and on-the-fly when configuring opportunity skill benchmarks.
-* **Applicant Screening & Match Inspection:** View candidate applications sorted by match score with detailed skill breakdown matrices (matched, partial, missing skills).
-* **Application Status Controls:** Promote candidates through hiring stages (`shortlisted`, `accepted`, `rejected`).
-* **Initiative Creation:** Publish collaboration events (Workshops, Mentorship, Live Projects) with capacity limits, start/end dates, schedule times, and target audiences.
-* **Participant Roster Management:** Review and approve student/faculty applications for published collaboration initiatives.
-
-### Academic Institution Module
-* **Institution Profile & Governance:** Manage university/college credentials, campus location, institutional code, and official website.
-* **Enrolled Student Roster:** Browse all registered students associated with the institution.
-* **Multi-Criteria Filtering:** Filter student rosters by Department, Degree program, Semester, and minimum CGPA.
-* **Student Skill Monitoring:** Inspect aggregate skill proficiencies and verified assessment badges across departments.
-* **Collaboration Visibility:** Monitor institutional participation in industry-led initiatives.
+* **Account Verification Workflow:** Immediate registration with admin approval workflow (`pending` $\rightarrow$ `approved`).
+* **Company Profile Management:** Corporate branding, sector, website, description, and contact info.
+* **Multi-Type Opportunity Posting:** Post **Full-Time Jobs**, **Internships**, **Apprenticeships**, and **Live Projects** with work mode (`On-site`, `Hybrid`, `Remote`), stipend ranges, deadlines, and skill prerequisites.
+* **Skill Benchmark Configuration:** Specify required proficiency levels ($1 - 100\%$) for each opportunity.
+* **Candidate Match Inspection:** Screen applicants sorted by compatibility percentage with detailed skill breakdown matrices (matched, partial, missing skills).
+* **Application Status Management:** Advance candidates through recruitment stages (`shortlisted`, `accepted`, `rejected`).
+* **Assessment Question Contribution:** Submit custom questions to the shared question bank for review by Admin.
+* **Collaboration Initiatives:** Host mentorships, workshops, hackathons, and guest lectures with seat limits and scheduling.
 
 ### Faculty / Academician Module
-* **Academic Collaboration Access:** Shared access to institutional dashboards and student skill visibility.
-* **Initiative Creation & Participation:** Host or participate in faculty development programs (FDPs), guest lectures, industrial research projects, and student mentorship.
+* **Faculty Profile & Academic Association:** Link profile to verified academic institutions.
+* **Question Contribution Engine:** Submit technical questions to skill banks tagged with `source_type = 'faculty'`.
+* **Collaboration Initiatives:** Host or participate in Faculty Development Programs (FDPs), guest lectures, industrial research, and mentorships.
+* **Student Skill Visibility:** View student skill progress and departmental technical proficiencies.
+* **Dynamic Skill Requests:** Submit formal requests for new skills to be added to the platform master database.
+
+### Academic Institution Module
+* **Institutional Dashboard:** Comprehensive overview of enrolled students, placement metrics, and active industry partners.
+* **Student Roster Analytics:** Multi-criteria filtering by Department, Degree, Semester, and CGPA thresholds.
+* **Skill Monitoring:** Real-time visibility into student skill proficiencies and verified badge statistics.
+* **Placement & Internship Tracking:** Track student application statuses and active industrial engagements.
 
 ### Admin Governance Module
-* **Platform Governance Dashboard:** Centralized management console for monitoring platform health and user registrations.
-* **Industry Verification Console:** Inspect pending industry registrations, verify legal credentials, and approve or reject accounts.
-* **Institution Verification Console:** Approve or reject academic institution registrations to maintain ecosystem trust.
+* **Verification Console:** Inspect and approve/reject pending Industry and Academic Institution registrations.
+* **Assessment Question Moderation:** Moderate contributed questions across `Pending`, `Approved`, `Rejected`, and `All Questions` tabs.
+* **Question Audit & Direct Editor:** View full question details, options, explanations, edit prompts directly, or reject with a mandatory feedback reason.
+* **Question Bank Summary by Skill:** View total, approved, pending, and rejected question counts per skill with bank status deficit badges.
+* **Skill Target Management:** Configure target question requirements per skill with inline editing.
+* **Skill Request Moderation:** Review, approve, or reject skill requests submitted by industry and faculty members.
 
 ---
 
-## 5. Skill Assessment System
+## 4. Skill Assessment System
 
-The assessment system provides objective verification of technical skills via server-side evaluated multiple-choice tests.
+SkillBridge relies on objective, server-evaluated technical assessments rather than self-reported proficiency.
 
+```text
+               Skill Assessment & Proficiency Workflow
+               
+Select Skill  ──►  Start Test  ──► Fetch Approved Questions (Hidden Answers)
+                                                  │
+                                                  ▼
+Receive Badge ◄── Save Score % ◄── Evaluate Test ◄── Submit Answers
+ (Score >= 70%)    to Profile       (Server DB)
 ```
-+-----------------------+      +-----------------------+      +-----------------------+
-|  1. Select Skill      | ---> |  2. Fetch Questions   | ---> |  3. Submit Answers    |
-| (e.g. React / SQL)    |      | (Omit Correct Answers)|      | (Server-Side Eval)    |
-+-----------------------+      +-----------------------+      +-----------------------+
-                                                                          |
-                                                                          v
-+-----------------------+      +-----------------------+      +-----------------------+
-|  6. Profile Updated   | <--- |  5. Badge Issued      | <--- |  4. Calculate Score   |
-| (Proficiency % Saved) |      | (If Score >= 70%)     |      | (0% - 100%)           |
-+-----------------------+      +-----------------------+      +-----------------------+
+
+### Key Assessment Rules
+1. **Centralized Question Bank:** Questions are linked to specific skills in the `skills` table.
+2. **Server-Side Evaluation:** Answers are scored exclusively on the backend (`POST /api/assessments/submit`). Correct answer options and explanations are never sent to the client during assessment delivery.
+3. **Automated Proficiency Calculation:**
+   $$\text{Proficiency Score \%} = \left( \frac{\text{Correct Answers}}{\text{Total Questions}} \right) \times 100$$
+4. **Badge Persistence:** Scoring $\ge 70\%$ automatically grants an earned badge (`is_badge_earned = true`) and marks the skill verification source as `"Verified Assessment"`.
+5. **No Manual Score Selection:** Students **cannot** manually select or alter their assessed proficiency score.
+
+---
+
+## 5. Smart Question Selection Engine
+
+Instead of presenting the entire question bank, SkillBridge selects a balanced set of questions per assessment attempt based on the skill's target configuration:
+
+* **Configurable Question Target:** Admins set a target question count per skill (default: 10–15 questions per assessment).
+* **Filter by Approval:** Only questions with `status = 'approved'` are eligible for student assessments.
+* **Balanced Difficulty Distribution:** Selects a mix of `Easy`, `Medium`, and `Hard` questions.
+* **Contributor Diversity:** Draws questions randomly from system-generated, industry-contributed, and faculty-contributed entries.
+* **Repeat Minimization:** Cross-references `assessment_attempt_questions` history to minimize question repetition across attempts.
+* **Skill-Family Fallback:** If an exact skill has zero approved questions, the system fallback algorithm fetches questions from related skill families (e.g., mapping React requests to JavaScript/Frontend banks).
+
+---
+
+## 6. Shared Question Contribution Pool
+
+SkillBridge uses a shared question pool per skill. Multiple verified stakeholders contribute questions to enrich the central assessment pool:
+
+```text
+                      React Question Bank
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       ▼                       ▼                       ▼
+System Base Questions   Industry Questions      Faculty Questions
+  (source_type: system)  (source_type: industry) (source_type: faculty)
+       │                       │                       │
+       └───────────────────────┼───────────────────────┘
+                               ▼
+                    Admin Moderation Queue
+                     (status: 'pending')
+                               │
+                               ▼
+                       Approved Pool
+                (Eligible for Student Tests)
 ```
 
-### Architecture & Security Guarantees
-* **Server-Side Security:** When fetching questions (`GET /api/assessments/questions/:skillId`), the backend explicitly excludes `correct_option` and `explanation` columns from the SQL response payload to prevent client-side inspection.
-* **Skill-Family Fallback Engine:** If an exact `skill_id` does not have dedicated questions loaded, the system executes a strict skill-family query fallback (e.g., mapping MySQL requests to SQL question banks or React queries to React banks) ensuring students always receive relevant technical evaluations.
-* **Score & Proficiency Calculation:** Upon submission (`POST /api/assessments/submit`), responses are checked against server DB answers:
-  $$\text{Score \%} = \left( \frac{\text{Correct Answers}}{\text{Total Questions}} \right) \times 100$$
-* **Badge Issuance & Persistence:** If $\text{Score \%} \ge 70\%$, `is_badge_earned` is set to `true` and the score is persisted in `student_skills` with `verification_source = 'Verified Assessment'`.
+* Industry partners and faculty can submit questions via `POST /api/assessment/questions`.
+* Contributed questions enter `status = 'pending'`.
+* Once approved by an Admin, the question enters the **common shared pool** for that skill.
+* Students receive a randomized blend of approved questions regardless of who contributed them.
 
 ---
 
-## 6. Skill Gap Analysis & Target Readiness
+## 7. Admin Question Moderation Console
 
-SkillBridge compares a student’s current assessed proficiency against aggregated industry demand across all published opportunities.
+The Admin Assessment Moderation dashboard (`AdminAssessmentModeration.tsx`) provides complete oversight of the question bank:
 
-### Mathematical Formulas
+```text
+┌──────────────────────────────────────────────────────────────────────────┐
+│                     ADMIN QUESTION MODERATION CONSOLE                    │
+├─────────────┬─────────────┬─────────────┬────────────────────────────────┤
+│ Pending (3) │ Approved    │ Rejected    │ All Questions                  │
+└─────────────┴─────────────┴─────────────┴────────────────────────────────┘
+```
 
-#### 1. Skill Match Percentage
-For a specific demanded skill $i$:
-$$\text{Match } \%_i = \min\left(100, \left\lfloor \frac{\text{Student Proficiency}_i}{\text{Required Proficiency}_i} \times 100 \right\rfloor \right)$$
-
-#### 2. Overall Industry Readiness Index
-Calculates a weighted readiness percentage across all active market demands, where the weight $W_i$ equals the total number of active job postings requiring skill $i$:
-$$\text{Readiness Index} = \min\left(100, \left\lfloor \frac{\sum_{i=1}^{N} \min(\text{Student Proficiency}_i, \text{Avg Required}_i) \times W_i}{\sum_{i=1}^{N} \text{Avg Required}_i \times W_i} \times 100 \right\rfloor \right)$$
-
-### Skill Categorization Criteria
-* **Strong ($\ge \text{Avg Required}$):** Meets or exceeds industry expectations.
-* **Needs Improvement ($\ge 60\%$ of $\text{Avg Required}$):** Partial competence; minor score boost recommended.
-* **Critical Gap ($< 60\%$ or Unpossessed):** Urgent priority area for targeted learning and re-assessment.
-
----
-
-## 7. Industry Demand Engine
-
-The Industry Demand engine extracts real-time market signals directly from active opportunity postings (`opportunities` JOIN `opportunity_skills`).
-
-### Aggregation Query Dynamics
-The system aggregates:
-1. **Demand Frequency:** Count of active hiring postings requiring the skill.
-2. **Average Target Proficiency:** $\text{ROUND}(\text{AVG}(\text{required\_proficiency}))$.
-3. **Peak Required Proficiency:** $\text{MAX}(\text{required\_proficiency})$.
-
-Students use these metrics to prioritize which skill assessments to take first.
+### Moderation Capabilities
+* **Status Views:** Filter questions by **Pending** (default workflow), **Approved**, **Rejected**, or **All Questions**.
+* **Audit Details Modal:** Inspect full question text, options A–D, correct answer, explanation, difficulty, contributor source, and rejection reason.
+* **Approve Action:** Single-click approval (`PUT /api/admin/assessment/questions/:id/approve`) moves pending questions into active student assessment pools.
+* **Reject Action:** Rejection modal requires a mandatory rejection reason (`PUT /api/admin/assessment/questions/:id/reject`), notifying contributors.
+* **Inline Direct Editor:** Admins can edit question text, options, difficulty, or correct answer key (`PUT /api/admin/assessment/questions/:id`).
+* **Multi-Param Filtering:** Filter questions by Skill, Difficulty (`Easy`, `Medium`, `Hard`), and Contributor Source (`system`, `industry`, `faculty`).
+* **Server-Side Pagination:** Efficient page navigation across large question repositories.
 
 ---
 
-## 8. Skill-Based Opportunity Matching Engine
+## 8. Question Bank Summary & Skill Configuration
 
-When a student views an opportunity, the `MatchingService` calculates a deterministic compatibility score.
+Located under the **Question Bank & Skill Config** tab, this view provides dynamic question statistics for every skill in the database:
+
+| Skill | Category | Target Questions | Total | Approved | Pending | Rejected | Bank Status | Actions |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **JavaScript** | Programming | **15** | 32 | 27 | 3 | 2 | <span style="color:#10b981">✓ Target Met</span> | [View Questions] |
+| **TypeScript** | Programming | **15** | 24 | 20 | 2 | 2 | <span style="color:#10b981">✓ Target Met</span> | [View Questions] |
+| **React** | Web Dev | **20** | 41 | 35 | 4 | 2 | <span style="color:#10b981">✓ Target Met</span> | [View Questions] |
+| **Docker** | DevOps | **10** | 3 | 2 | 1 | 0 | <span style="color:#f59e0b">⚠️ Need 8 More</span> | [View Questions] |
+
+### Key Summary Features
+* **Dynamic Database Aggregation:** Counts are computed in real time using SQL `GROUP BY` and `CASE` conditional aggregations.
+* **Editable Skill Targets:** Admins can click and edit `target_questions` directly in the summary table (`PUT /api/admin/assessment/skills/:id/target-questions`).
+* **Bank Status Indicators:** Displays dynamic readiness badges calculated as $\max(0, \text{Target} - \text{Approved})$.
+* **Instant Audit Filtering:** Clicking **"View Questions"** switches sub-tabs to the question moderation list, resets pagination, sets status filter to `"all"`, and pre-filters by the selected skill.
+
+---
+
+## 9. Skill Management & Dynamic Requests
+
+SkillBridge maintains a master skill registry while supporting dynamic growth:
+
+* **Master Skills Table:** Stores skill names, categories (`Programming`, `Web Dev`, `Database`, `DevOps`, `AI/ML`, `Soft Skills`), and target assessment thresholds.
+* **Dynamic Skill Requests:** Industry partners and faculty can request new skills through `POST /api/assessment/skills/request`.
+* **Admin Review Queue:** Admins can review pending requests (`GET /api/admin/skill-requests`) and approve (`PUT /api/admin/skill-requests/:id/approve`) or reject them (`PUT /api/admin/skill-requests/:id/reject`). Approved skills are instantly added to the master `skills` table.
+
+---
+
+## 10. Skill-Based Opportunity Matching Engine
+
+The `MatchingService` evaluates applicant suitability by comparing assessed student skills against opportunity skill requirements.
 
 ### Match Algorithm Logic
+For an opportunity requiring $N$ skills:
+1. For each required skill $i$ with required proficiency $R_i$:
+   $$\text{Match } \%_i = \min\left(100, \left\lfloor \frac{\text{Student Assessed Proficiency}_i}{R_i} \times 100 \right\rfloor \right)$$
+2. Overall Compatibility Score:
+   $$\text{Final Match Score \%} = \min\left(100, \text{ROUND}\left( \frac{\sum_{i=1}^{N} \text{Match } \%_i}{N} \right)\right)$$
 
-```typescript
-// Equal-weight average across all required opportunity skills
-const rawAverage = totalMatchPercentageSum / requiredSkills.length;
-const finalMatchScore = Math.min(100, Math.round(rawAverage));
-```
+### Match Classifications
 
-### Match Category Breakdown
-
-| Match Score Range | Category Label | Description |
+| Compatibility Score | Category Label | Description |
 | :--- | :--- | :--- |
-| **80% – 100%** | `Excellent Match` | High skill alignment; prime candidate for shortlisting. |
-| **60% – 79%** | `Good Match` | Solid overall fit with minor skill gaps. |
+| **80% – 100%** | `Excellent Match` | High skill alignment; optimal for immediate shortlisting. |
+| **60% – 79%** | `Good Match` | Solid candidate fit with minor skill gaps. |
 | **40% – 59%** | `Moderate Match` | Partial fit; requires supplementary training. |
 | **0% – 39%** | `Low Match` | Substantial skill discrepancy. |
-| *No Skills Assessed* | `Incomplete Profile` | Student has not completed relevant skill assessments. |
-| *No Skills Required* | `Match Unavailable` | Opportunity has no explicit skill prerequisites. |
+| *No Assessed Skills* | `Incomplete Profile` | Student has not completed relevant skill assessments. |
 
 ---
 
-## 9. Internship & Placement System
+## 11. Application Management & Recruitment Pipeline
 
-SkillBridge provides complete application management for industry opportunities.
-
-### Workflow Pipeline
-```
-[ Industry Posts Opportunity ]
-             │
-             ▼
-[ Student Browses & Checks Match Score ]
-             │
-             ▼
-[ Student Submits Application + Resume URL ]
-             │
-             ▼
-[ Industry Inspects Applicants & Match Matrix ]
-             │
-             ├───────────────────────┬───────────────────────┐
-             ▼                       ▼                       ▼
-   [ Status: Shortlisted ]   [ Status: Accepted ]    [ Status: Rejected ]
+```text
+Student Views Opportunity  ──► Check Match Score  ──► Submit Application + Resume
+                                                              │
+                                                              ▼
+Shortlisted / Accepted / Rejected ◄── Screen Match Matrix ◄── Industry Reviews Applicant
 ```
 
-### Supported Opportunity Types
-* **Full-Time Placement**
-* **Internship**
-* **Apprenticeship**
-* **Contract / Project-Based**
+### Application Features
+* **Supported Opportunity Types:** Full-Time Placements, Internships, Apprenticeships, Live Projects.
+* **Deadline Enforcement:** Client-side and server-side validation blocks applications for expired deadlines.
+* **Clean Modal Lifecycle:** Application state and messages automatically reset on modal open/close.
+* **Applicant Screening Matrix:** Recruiters view applicants ordered by match score, with breakdown metrics showing matched, partial, and missing skills.
 
 ---
 
-## 10. Academia–Industry Collaboration Hub
+## 12. Student Digital Portfolio
 
-The Collaboration Hub fosters structured interactions between academic institutions, faculty, and industry leaders.
+SkillBridge automatically compiles student activities into an objective digital portfolio:
 
-### Supported Collaboration Initiatives
-
-| Collaboration Type | Description | Target Audience | Execution Mode |
-| :--- | :--- | :--- | :--- |
-| **Mentorship** | One-on-one or group industry guidance sessions. | Student / Both | Online / Hybrid |
-| **Workshop** | Hands-on practical technical training sessions. | Student / Faculty / Both | Online / Offline / Hybrid |
-| **Guest Lecture** | Expert lectures on emerging technological trends. | Student / Both | Online / Offline |
-| **Innovation Challenge** | Hackathons and industrial problem-solving competitions. | Student | Online / Offline / Hybrid |
-| **Live Industry Project** | Real-world industry project engagement for students. | Student | Hybrid / Offline |
-| **Research Collaboration** | Joint academic-industrial research initiatives. | Faculty / Both | Hybrid / Offline |
-| **Faculty Training (FDP)** | Upskilling sessions for academic faculty. | Faculty | Online / Offline |
-| **Industrial Training** | On-site corporate immersion programs. | Student / Faculty | Offline |
-
-### Initiative Controls
-* **Granular Time Scheduling:** Configurable start dates, end dates, and schedule times (e.g. `10:00 AM - 04:00 PM IST`).
-* **Capacity Management:** Seat capacity limits with automatic registration tracking.
-* **Competency Tagging:** Association with DB master skills or dynamic custom skills.
-
----
-
-## 11. Verification & Trust Model
-
-To prevent unauthorized or fraudulent postings, SkillBridge enforces a multi-tier trust model:
-
-```
-[ User Registers as Industry / Institution ]
-                    │
-                    ▼
-       [ Account Created in DB ]
-                    │
-                    ▼
-     [ Status Defaults to 'pending' ]
-                    │
-   ┌────────────────┴────────────────┐
-   │ (Can login & set up profile,    │
-   │  BUT publishing is restricted)   │
-   └────────────────┬────────────────┘
-                    │
-                    ▼
-  [ Admin Reviews Credentials in Console ]
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-  [ Admin Approves ]  [ Admin Rejects ]
-          │                   │
-          ▼                   ▼
-[ Status: 'approved' ] [ Status: 'rejected' ]
-(Full Publishing Access) (Access Restricted)
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       STUDENT DIGITAL PORTFOLIO                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│ • Verified Skills & Badges  (Assessment scores >= 70%)                  │
+│ • Academic Details          (Degree, Department, CGPA, Institution)     │
+│ • Certifications            (Title, Issuer, Credential URL)             │
+│ • Academic/Personal Projects(Title, Description, Tech Stack, Repo Links)│
+│ • Work Experiences          (Role, Company, Duration, Description)      │
+│ • Uploaded Resume           (PDF/Docx storage link)                     │
+│ • Social Presence           (GitHub, LinkedIn, Portfolio URLs)          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 12. Role-Based Access Control (RBAC)
+## 13. Role-Based Access Control (RBAC)
 
-Authorization is strictly enforced server-side using custom Express middlewares (`authenticateToken` and `authorizeRoles`).
+Access permissions are enforced on the backend via Express middlewares (`authenticateToken` and `authorizeRoles`).
 
-| Feature / Endpoint | Student | Industry Partner | Institution | Faculty | Admin |
+| Platform Capability | Student | Industry Partner | Faculty | Institution | Admin |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Take Skill Assessments** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **View Skill Gap Analysis** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **View Personal Skill Gap Analysis** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Apply for Opportunities** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Post Opportunities** | ❌ | ✅ (Verified) | ❌ | ❌ | ❌ |
-| **Screen & Shortlist Applicants** | ❌ | ✅ | ❌ | ❌ | ❌ |
-| **Publish Collaboration Events** | ❌ | ✅ (Verified) | ✅ (Verified) | ✅ | ✅ |
+| **Post Opportunities & Jobs** | ❌ | ✅ (Verified) | ❌ | ❌ | ❌ |
+| **Screen Applicants & Match Matrices** | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Contribute Question Bank Items** | ❌ | ✅ | ✅ | ❌ | ✅ |
+| **Host Collaboration Initiatives** | ❌ | ✅ (Verified) | ✅ | ✅ (Verified) | ✅ |
 | **View Student Roster Analytics** | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **Approve / Reject Verification** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Approve / Reject Accounts & Questions** | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
-## 13. System Architecture
+## 14. Smart Automation Architecture
 
-```mermaid
-flowchart TD
-    subgraph Client Tier [Frontend - React 19 + Vite]
-        UI[User Interface & Dashboards]
-        AuthCtx[Auth Context & JWT State]
-        Router[React Router DOM v7]
-    end
+SkillBridge automates manual recruiting and academic gap workflows through rule-based execution pipelines:
 
-    subgraph API Tier [Backend - Node.js + Express 5]
-        AuthMW[JWT Auth Middleware]
-        RBAC[Role Authorization Guard]
-        
-        subgraph Controllers [Express Controllers]
-            AuthCtrl[Auth Controller]
-            SkillCtrl[Skills Controller]
-            AssessCtrl[Assessment Controller]
-            MatchCtrl[Matching Controller]
-            OppCtrl[Opportunity Controller]
-            CollabCtrl[Collaboration Controller]
-            InstCtrl[Institution Controller]
-            AdminCtrl[Admin Controller]
-        end
-
-        subgraph Services [Domain Services]
-            MatchEngine[Matching & Readiness Engine]
-        end
-    end
-
-    subgraph Data Tier [Database - MySQL 8.0]
-        DB[(MySQL Connection Pool)]
-    end
-
-    UI --> Router
-    Router --> AuthCtx
-    AuthCtx -->|HTTPS / REST API| AuthMW
-    AuthMW --> RBAC
-    RBAC --> Controllers
-    MatchCtrl --> MatchEngine
-    Controllers --> DB
-    Services --> DB
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     SMART AUTOMATION PIPELINE                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 1. Student Takes Assessment ──► Automated Server-Side Scoring & Badging │
+│ 2. Score Saved              ──► Automated Skill Gap & Readiness Calculation│
+│ 3. Active Hiring Postings   ──► Automated Real-Time Industry Demand Map │
+│ 4. Opportunity Browse       ──► Automated Compatibility Score Algorithm │
+│ 5. Recruitment Pipeline     ──► Automated Application Status Workflows  │
+│ 6. Institution Dashboard    ──► Automated Departmental Skill Analytics  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
-
----
-
-## 14. Database Schema & Data Models
-
-The MySQL database schema comprises 15 relational tables engineered with foreign key integrity.
-
-```
-                  +-------------------+
-                  |       users       |
-                  +-------------------+
-                    /       |       \
-                   /        |        \
-                  v         v         v
-+-------------------+ +-----------+ +----------------------+
-|  student_profiles | |institutions| |  industry_profiles   |
-+-------------------+ +-----------+ +----------------------+
-  /        |        \                          |
- v         v         v                         v
-+-------+ +--------+ +-------------+    +---------------+
-|student| |student_| |student_     |    | opportunities |
-|_skills| |projects| |certifications|    +---------------+
-+-------+ +--------+ +-------------+      /           \
-    |                                    v             v
-    v                           +--------------+ +--------------+
-+-------+                       | opportunity_ | | applications |
-| skills|                       |    skills    | +--------------+
-+-------+                       +--------------+
-    |                                   
-    v                                   +----------------+
-+----------------------+                | collaborations |
-| assessment_questions |                +----------------+
-+----------------------+                   /            \
-                                          v              v
-                               +---------------+ +--------------+
-                               | collaboration_| |collaboration_|
-                               |    skills     | | participants |
-                               +---------------+ +--------------+
-```
-
-### Table Definitions Summary
-1. **`users`**: Core credentials (`id`, `name`, `username`, `email`, `password`, `role`, `institution_id`, `created_at`).
-2. **`institutions`**: College details (`id`, `name`, `code`, `location`, `website`, `verification_status`).
-3. **`student_profiles`**: Academic profile (`id`, `user_id`, `degree`, `department`, `cgpa`, `location`, `bio`).
-4. **`student_skills`**: Assessed skills (`id`, `student_id`, `skill_id`, `proficiency_score`, `verification_source`, `is_badge_earned`).
-5. **`student_projects`**: Portfolio projects (`id`, `student_id`, `title`, `description`, `project_url`, `repo_url`).
-6. **`student_certifications`**: Certifications (`id`, `student_id`, `title`, `issuing_organization`, `issue_date`, `credential_url`).
-7. **`skills`**: Master skills registry (`id`, `name`, `category`).
-8. **`assessment_questions`**: MCQ bank (`id`, `skill_id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `explanation`, `difficulty`).
-9. **`industry_profiles`**: Partner profiles (`id`, `user_id`, `company_name`, `industry_type`, `website`, `location`, `description`, `verification_status`, `logo`).
-10. **`opportunities`**: Jobs & Internships (`id`, `industry_id`, `title`, `description`, `type`, `location`, `work_mode`, `stipend_min`, `stipend_max`, `duration`, `application_deadline`, `status`).
-11. **`opportunity_skills`**: Job skill benchmarks (`id`, `opportunity_id`, `skill_id`, `required_proficiency`).
-12. **`applications`**: Job applications (`id`, `student_id`, `opportunity_id`, `status`, `cover_letter`, `resume_url`, `applied_at`).
-13. **`collaborations`**: Collaboration initiatives (`id`, `created_by`, `industry_id`, `institution_id`, `title`, `description`, `collaboration_type`, `target_audience`, `start_date`, `end_date`, `start_time`, `location`, `mode`, `capacity`, `status`).
-14. **`collaboration_skills`**: Initiative skills (`id`, `collaboration_id`, `skill_id`).
-15. **`collaboration_participants`**: Event registrations (`id`, `collaboration_id`, `user_id`, `role`, `status`, `applied_at`).
 
 ---
 
 ## 15. Technology Stack
 
 ### Frontend Architecture
-* **Core Library:** React 19.2
+* **Framework:** React 19.2
 * **Build Tool:** Vite 8.1
-* **Language:** TypeScript 6.0
+* **Language:** TypeScript 5.7
 * **Routing:** React Router DOM 7.18
-* **Styling:** Vanilla CSS3 (Custom Glassmorphism Design Token System) + TailwindCSS 4.3
-* **Iconography:** Lucide React 1.34
+* **Styling:** Vanilla CSS3 (Design Tokens + Glassmorphism) + Tailwind CSS 4.3
+* **Icons:** Lucide React 1.34
 
 ### Backend Architecture
 * **Runtime:** Node.js (ES Modules)
 * **Framework:** Express 5.2
-* **Language:** TypeScript 7.0
-* **Database Driver:** `mysql2` 3.24 (with Promise Pool & Connection Pooling)
-* **Authentication:** JSON Web Tokens (`jsonwebtoken` 9.0) + Password Hashing (`bcrypt` 6.0)
+* **Language:** TypeScript 5.7
+* **Database Driver:** `mysql2` 3.24 (Promise Connection Pool)
+* **Auth & Security:** JSON Web Tokens (`jsonwebtoken` 9.0) + Password Hashing (`bcrypt` 6.0)
 * **Validation:** Zod 4.4
-* **Dev Runner:** `tsx` 4.23 + Nodemon 3.1
+* **Development Runner:** `tsx` 4.23 + Nodemon 3.1
 
 ---
 
-## 16. Repository Structure
+## 16. Database Architecture
 
+SkillBridge uses a relational MySQL schema comprising 20 tables:
+
+```mermaid
+erDiagram
+    users ||--o{ student_profiles : has
+    users ||--o{ industry_profiles : has
+    users ||--o| institutions : belongs_to
+    student_profiles ||--o{ student_skills : possesses
+    student_profiles ||--o{ student_projects : builds
+    student_profiles ||--o{ student_certifications : holds
+    student_profiles ||--o{ student_work_experiences : records
+    student_profiles ||--o{ applications : submits
+    skills ||--o{ student_skills : references
+    skills ||--o{ assessment_questions : categorizes
+    skills ||--o{ opportunity_skills : requires
+    industry_profiles ||--o{ opportunities : posts
+    opportunities ||--o{ opportunity_skills : defines
+    opportunities ||--o{ applications : receives
+    skills ||--o{ skill_requests : requests
 ```
+
+### Major Database Tables
+1. `users`: Credentials, emails, roles, institution references.
+2. `institutions`: Academic institutions, campus codes, verification status.
+3. `student_profiles`: Academic data, CGPA, graduation expectations, bio, student ID.
+4. `skills`: Master skills registry, category, `target_questions`.
+5. `student_skills`: Assessed proficiency scores, badge statuses, verification sources.
+6. `assessment_questions`: MCQ bank, options A–D, correct answer, difficulty, `source_type`, contributor user ID, status, rejection reason.
+7. `assessment_attempts`: Student test session records, scores, completion timestamps.
+8. `assessment_attempt_questions`: Questions answered during specific attempts.
+9. `skill_requests`: Requested new skills, status, rejection reason.
+10. `industry_profiles`: Corporate info, verification status, contact details.
+11. `opportunities`: Jobs, internships, work modes, stipends, application deadlines.
+12. `opportunity_skills`: Required skill benchmarks per opportunity.
+13. `applications`: Student applications, cover letters, resume URLs, statuses.
+14. `student_projects`: Projects, descriptions, tech stack JSON, repository URLs.
+15. `student_certifications`: Professional certifications, issuer, dates, URLs.
+16. `student_resumes`: Active student uploaded resume file metadata.
+17. `student_work_experiences`: Work and internship experience records.
+18. `collaborations`: Mentorships, workshops, guest lectures, hackathons, FDPs.
+19. `collaboration_skills`: Skills associated with collaboration initiatives.
+20. `collaboration_participants`: Registrations for collaboration initiatives.
+
+---
+
+## 17. API & Backend Architecture
+
+### Key REST API Route Categories
+
+```text
+├── /api/auth
+│   ├── POST /register                   # Multi-role user registration
+│   ├── POST /login                      # JWT authentication & role payload
+│   └── GET  /me                         # Active user identity query
+├── /api/profile
+│   ├── GET  /student                    # Student profile retrieval
+│   ├── PUT  /student                    # Student profile updates
+│   ├── POST /student/projects           # Project portfolio addition
+│   ├── POST /student/certifications     # Certification addition
+│   └── POST /student/resume             # Resume metadata upload
+├── /api/skills
+│   ├── GET  /                           # List master skills
+│   ├── GET  /demand                     # Industry skill demand statistics
+│   └── GET  /gap-analysis               # Student skill gap analysis
+├── /api/assessments
+│   ├── GET  /questions/:skillId         # Fetch test questions (hidden answers)
+│   ├── POST /submit                     # Submit assessment & calculate score
+│   └── GET  /history                    # Student assessment attempt history
+├── /api/assessment (Contributor & Requests)
+│   ├── POST /questions                  # Submit question for moderation
+│   ├── GET  /questions/my               # Contributor question status
+│   └── POST /skills/request             # Request new skill entry
+├── /api/admin
+│   ├── GET  /verifications/industry     # Pending industry registrations
+│   ├── PUT  /verifications/industry/:id # Approve/reject industry account
+│   ├── GET  /assessment/questions       # Moderation question list (paginated)
+│   ├── PUT  /assessment/questions/:id/approve # Approve question
+│   ├── PUT  /assessment/questions/:id/reject  # Reject question with reason
+│   ├── PUT  /assessment/questions/:id         # Edit question directly
+│   ├── DELETE /assessment/questions/:id       # Delete question
+│   ├── GET  /assessment/skills/summary        # Skill summary stats
+│   └── PUT  /assessment/skills/:id/target-questions # Update target questions
+├── /api/opportunities
+│   ├── GET  /                           # Browse active opportunities
+│   ├── POST /                           # Create opportunity (Verified Industry)
+│   └── GET  /:id/match                  # Compute compatibility score
+├── /api/applications
+│   ├── POST /                           # Apply for opportunity
+│   ├── GET  /student                    # Student submitted applications
+│   ├── GET  /opportunity/:id            # Industry applicant screening list
+│   └── PUT  /:id/status                 # Update application status
+└── /api/collaborations
+    ├── GET  /                           # Browse collaboration initiatives
+    ├── POST /                           # Create initiative
+    └── POST /:id/register               # Event registration
+```
+
+---
+
+## 18. Project Structure
+
+```text
 Skill_Bridge/
 ├── backend/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── db.ts               # MySQL Connection Pool
-│   │   │   └── initTables.ts       # Database Table Creation & Schema Seeding
+│   │   │   └── initTables.ts       # Database Schema Seeding & Migrations
 │   │   ├── constants/
 │   │   │   └── matching.constants.ts
 │   │   ├── controllers/
@@ -503,26 +541,31 @@ Skill_Bridge/
 │   │   │   ├── profile.routes.ts
 │   │   │   └── skills.routes.ts
 │   │   ├── services/
-│   │   │   └── matching.service.ts # Matching & Skill Gap Calculation Engine
+│   │   │   └── matching.service.ts # Skill Matching & Gap Engine
 │   │   ├── types/
 │   │   │   └── user.type.ts
-│   │   └── server.ts               # Express Application Entrypoint
+│   │   └── server.ts               # Express Entrypoint
 │   ├── package.json
 │   └── tsconfig.json
 │
 └── frontend/
     ├── src/
-    │   ├── components/             # Reusable UI Components & Layout Sidebar
+    │   ├── components/
+    │   │   ├── admin/
+    │   │   │   └── AdminAssessmentModeration.tsx # Question Moderation & Summary
+    │   │   ├── dashboard/
+    │   │   ├── layout/
+    │   │   └── student/
+    │   │       └── ApplyOpportunityModal.tsx # Application Submission Modal
     │   ├── config/
-    │   │   └── api.ts              # API Base URL Config
+    │   │   └── api.ts
     │   ├── context/
-    │   │   ├── AuthContext.tsx     # Authentication Context & Token Storage
-    │   │   └── ThemeContext.tsx    # Theme Provider Context
+    │   │   ├── AuthContext.tsx
+    │   │   └── ThemeContext.tsx
     │   ├── pages/
     │   │   ├── admin/
     │   │   │   └── AdminDashboard.tsx
     │   │   ├── collaborations/
-    │   │   │   ├── CollaborationsPage.css
     │   │   │   └── CollaborationsPage.tsx
     │   │   ├── industry/
     │   │   │   ├── IndustryOpportunities.tsx
@@ -531,29 +574,53 @@ Skill_Bridge/
     │   │   │   ├── InstitutionDashboard.tsx
     │   │   │   └── InstitutionStudents.tsx
     │   │   ├── student/
-    │   │   │   ├── CompaniesPage.tsx
     │   │   │   ├── IndustryDemandReport.tsx
     │   │   │   ├── SkillGapAnalysis.tsx
     │   │   │   ├── StudentApplications.tsx
-    │   │   │   ├── StudentDetails.tsx
     │   │   │   └── StudentOpportunities.tsx
-    │   │   ├── Auth.tsx            # Login & Registration Page
-    │   │   ├── Dashboard.tsx       # Main Student Dashboard
-    │   │   └── LandingPage.tsx     # Public Hero Landing Page
-    │   ├── App.tsx                 # Route Registry & Role Guards
-    │   └── main.tsx
+    │   │   ├── Auth.tsx
+    │   │   ├── Dashboard.tsx
+    │   │   └── LandingPage.tsx
+    │   ├── App.tsx
+    │   ├── main.tsx
+    │   └── index.css               # Design Token Theme Utilities
     ├── package.json
     └── vite.config.ts
 ```
 
 ---
 
-## 17. Installation & Local Setup Guide
+## 19. Environment Variables
+
+Create `.env` configuration files in `backend/` and `frontend/` using these template placeholders. **Do NOT commit real credentials.**
+
+### Backend `.env` Template (`backend/.env`)
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your_jwt_secret_key_here
+
+# MySQL Connection Details
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=your_db_username
+DB_PASSWORD=your_db_password
+DB_NAME=skillbridge_db
+```
+
+### Frontend `.env` Template (`frontend/.env`)
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+---
+
+## 20. Installation & Local Setup Guide
 
 ### Prerequisites
 * **Node.js**: v18.0.0 or higher
 * **npm**: v9.0.0 or higher
-* **MySQL Server**: v8.0 or higher (Local installation or Cloud Instance e.g. Aiven / PlanetScale / Railway)
+* **MySQL Server**: v8.0 or higher (Local installation or Cloud instance like Aiven / PlanetScale)
 
 ---
 
@@ -568,73 +635,83 @@ cd Skill_Bridge
 ### Step 2: Configure & Start Backend
 
 ```bash
-# Navigate to backend directory
+# Navigate to backend
 cd backend
 
 # Install dependencies
 npm install
 
 # Create environment configuration file
-```
+cp .env.example .env   # Or create .env using template above
 
-Create a `.env` file inside the `backend/` directory:
-```env
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=your_super_secret_jwt_key_skillbridge_2026
-
-# MySQL Database Configuration
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=defaultdb
-```
-
-```bash
-# Initialize database tables and seeds automatically
+# Initialize database schema and initial tables
 npm run db:init
 
-# Start backend server in development mode
+# Start development server
 npm run dev
 ```
-*Backend server will start listening at `http://localhost:5000/api`.*
+*Backend server will listen at `http://localhost:5000/api`.*
 
 ---
 
 ### Step 3: Configure & Start Frontend
 
-Open a new terminal window:
+Open a new terminal tab/window:
 
 ```bash
-# Navigate to frontend directory
+# Navigate to frontend
 cd frontend
 
 # Install dependencies
 npm install
-```
 
-Create a `.env` file inside the `frontend/` directory:
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-```bash
-# Start frontend development server
+# Start Vite development server
 npm run dev
 ```
-*Frontend application will be accessible at `http://localhost:5173`.*
+*Frontend client will be available at `http://localhost:5173`.*
 
 ---
 
 ### Default Credentials for Testing
 
-| Role | Email | Password | Pre-set Verification Status |
+| Role | Email | Password | Account Status |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@skillbridge.edu` | `admin123` | Approved |
+| **Admin** | `admin@skillbridge.edu` | `admin123` | Active / Approved |
 | **Student** | `student@jisuniversity.ac.in` | `student123` | Active |
-| **Industry Partner** | `hr@techcorp.com` | `industry123` | Approved |
-| **Institution** | `registrar@jisuniversity.ac.in` | `institution123` | Approved |
+| **Industry Partner** | `hr@techcorp.com` | `industry123` | Verified / Approved |
+| **Institution** | `registrar@jisuniversity.ac.in` | `institution123` | Verified / Approved |
+
+---
+
+## 21. Deployment Architecture
+
+```text
+React 19 + Vite Frontend  ──► Deployed on Vercel  (https://skillbridgeportal.vercel.app)
+Express 5 REST Backend    ──► Deployed on Render  (https://skill-bridge-cxcz.onrender.com)
+MySQL 8.0 Database        ──► Hosted on Aiven     (Cloud Database Instance)
+```
+
+---
+
+## 22. Future Enhancements
+
+These planned features are kept separate from the currently fully-functional core platform:
+
+* **AI/ML Automated Resume Parser:** Extract skills automatically from uploaded PDF resumes.
+* **Proctored Assessment Suite:** Webcam/tab-switch detection during technical assessments.
+* **LMS Platform Integrations:** Direct links to Coursera/NPTEL courses based on critical skill gaps.
+* **Automated Document Verification:** OCR-based verification of student certificates and industry credentials.
+
+---
+
+## 23. Hackathon / SIH Relevance
+
+### Smart India Hackathon (SIH 2026)
+* **Problem Statement ID:** 26044
+* **Title:** Portal for Academia – Industry Collaboration for Skill Mapping, Internships and Placement
+* **Theme:** Smart Automation
+
+SkillBridge directly fulfills the SIH objective by building a single, automated digital bridge between educational institutions and the corporate sector. By replacing unverified claims with objective assessments, deterministic matching algorithms, and automated recruitment pipelines, SkillBridge empowers students, recruiters, faculty, and institutional leaders.
 
 ---
 

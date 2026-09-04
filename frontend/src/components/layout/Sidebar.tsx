@@ -116,6 +116,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
     location.pathname === "/student/details";
   const isIndustryActive = location.pathname === "/industry/profile";
   const isIndustryOppActive = location.pathname === "/industry/opportunities";
+  const isIndustryQuestionsActive = location.pathname === "/industry/questions";
   const isStudentOppActive = location.pathname === "/opportunities";
   const isStudentAppsActive = location.pathname === "/student/applications";
   const isCompaniesActive = location.pathname === "/companies";
@@ -123,6 +124,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const isAdminActive = location.pathname === "/admin/dashboard";
   const isInstitutionActive = location.pathname === "/institution/dashboard";
   const isInstStudentsActive = location.pathname === "/institution/students";
+  const isInstQuestionsActive = location.pathname === "/institution/questions";
   const isCollabActive = location.pathname === "/collaborations";
   const isSavedActive = location.pathname === "/student/saved";
   const isLearningActive = location.pathname === "/student/learning";
@@ -297,19 +299,8 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
               >
                 <SideItem
                   icon={<Building2 />}
-                  text="Industry Verification"
+                  text="Verification"
                   active={isAdminActive}
-                />
-              </div>
-
-              <div
-                onClick={() => handleNavigation("/dashboard")}
-                style={{ cursor: "pointer" }}
-              >
-                <SideItem
-                  icon={<Home />}
-                  text="Platform Overview"
-                  active={isHomeActive}
                 />
               </div>
             </>
@@ -350,6 +341,17 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                 />
               </div>
               <div
+                onClick={() => handleNavigation("/industry/questions")}
+                style={{ cursor: "pointer" }}
+              >
+                <SideItem
+                  icon={<ClipboardCheck />}
+                  text="Assessment Question Bank"
+                  active={isIndustryQuestionsActive}
+                  badge="Contribute"
+                />
+              </div>
+              <div
                 onClick={() => handleNavigation("/collaborations")}
                 style={{ cursor: "pointer" }}
               >
@@ -382,6 +384,17 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                   icon={<Users />}
                   text="Enrolled Student Details & Skills"
                   active={isInstStudentsActive}
+                />
+              </div>
+              <div
+                onClick={() => handleNavigation("/institution/questions")}
+                style={{ cursor: "pointer" }}
+              >
+                <SideItem
+                  icon={<FileText />}
+                  text="Faculty Question Bank"
+                  active={isInstQuestionsActive}
+                  badge="Contribute"
                 />
               </div>
               <div
