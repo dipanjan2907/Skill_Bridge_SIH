@@ -23,6 +23,7 @@ export const getStudentProfile = async (req, res) => {
         sp.degree, 
         sp.department, 
         sp.roll_number, 
+        sp.student_id,
         sp.current_sem, 
         sp.cgpa, 
         sp.expected_grad, 
@@ -65,6 +66,7 @@ export const getStudentProfile = async (req, res) => {
           sp.degree, 
           sp.department, 
           sp.roll_number, 
+          sp.student_id,
           sp.current_sem, 
           sp.cgpa, 
           sp.expected_grad, 
@@ -126,6 +128,14 @@ export const getStudentProfile = async (req, res) => {
        FROM student_certifications 
        WHERE student_id = ?
        ORDER BY id DESC`, [studentProfileId]);
+        const primaryRole = Array.isArray(profile.target_roles) && profile.target_roles.length > 0
+            ? profile.target_roles[0]
+            : rawProfile.department || "Software Engineer";
+        const calculatedMatchScore = skills.length > 0 ? Math.min(98, 70 + skills.length * 6) : null;
+        if (calculatedMatchScore !== rawProfile.career_match_score) {
+            pool.query(`UPDATE student_profiles SET career_match_score = ? WHERE id = ?`, [calculatedMatchScore, studentProfileId]).catch((err) => console.error("Error updating career_match_score in DB:", err));
+            profile.career_match_score = calculatedMatchScore;
+        }
         res.status(200).json({
             profile,
             skills,
@@ -144,7 +154,7 @@ export const updateStudentProfile = async (req, res) => {
         res.status(401).json({ error: "Unauthorized access" });
         return;
     }
-    const { name, phone, location, dob, gender, bio, institution_id, degree, department, roll_number, current_sem, cgpa, expected_grad, counselor, github, linkedin, portfolio, work_mode_preference, expected_stipend_min, expected_stipend_max, preferred_locations, target_roles, } = req.body;
+    const { name, phone, location, dob, gender, bio, institution_id, degree, department, roll_number, student_id, studentId, current_sem, cgpa, expected_grad, counselor, github, linkedin, portfolio, work_mode_preference, expected_stipend_min, expected_stipend_max, preferred_locations, target_roles, } = req.body;
     try {
         // Update user full name in users table if changed
         if (name) {
@@ -155,12 +165,14 @@ export const updateStudentProfile = async (req, res) => {
         const cleanCgpa = cgpa ? parseFloat(cgpa) || null : null;
         const cleanStipendMin = expected_stipend_min ? parseInt(expected_stipend_min) || null : null;
         const cleanStipendMax = expected_stipend_max ? parseInt(expected_stipend_max) || null : null;
+        const rawStudentId = student_id !== undefined ? student_id : studentId;
+        const cleanStudentId = rawStudentId && typeof rawStudentId === "string" && rawStudentId.trim() !== "" ? rawStudentId.trim() : null;
         await pool.query(`INSERT INTO student_profiles (
         user_id, institution_id, phone, location, dob, gender, bio, degree,
-        department, roll_number, current_sem, cgpa, expected_grad,
+        department, roll_number, student_id, current_sem, cgpa, expected_grad,
         counselor, github, linkedin, portfolio, work_mode_preference,
         expected_stipend_min, expected_stipend_max, preferred_locations, target_roles
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE 
         institution_id = VALUES(institution_id),
         phone = VALUES(phone),
@@ -171,6 +183,7 @@ export const updateStudentProfile = async (req, res) => {
         degree = VALUES(degree),
         department = VALUES(department),
         roll_number = VALUES(roll_number),
+        student_id = VALUES(student_id),
         current_sem = VALUES(current_sem),
         cgpa = VALUES(cgpa),
         expected_grad = VALUES(expected_grad),
@@ -193,6 +206,7 @@ export const updateStudentProfile = async (req, res) => {
             degree || null,
             department || null,
             roll_number || null,
+            cleanStudentId,
             current_sem || null,
             cleanCgpa,
             expected_grad || null,

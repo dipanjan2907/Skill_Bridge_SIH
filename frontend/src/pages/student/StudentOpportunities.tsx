@@ -17,6 +17,7 @@ import {
   Target,
   Globe,
   RotateCw,
+  Bookmark,
 } from "lucide-react";
 import type { Opportunity } from "../../types/opportunity";
 import type { RecommendedOpportunity } from "../../types/matching";
@@ -28,10 +29,14 @@ import { useAuth } from "../../context/AuthContext";
 import { API_BASE_URL } from "../../config/api";
 
 const StudentOpportunities: React.FC = () => {
-  const { token } = useAuth();
-  const [viewMode, setViewMode] = useState<"recommended" | "all">("recommended");
+  const { token, user } = useAuth();
+  const userRole = user?.role ? String(user.role).toLowerCase() : "student";
+  const isAcademicianRole = ["academician", "faculty", "institution", "institute"].includes(userRole);
+
+  const [viewMode, setViewMode] = useState<"recommended" | "all">("all");
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendedOpportunity[]>([]);
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +54,53 @@ const StudentOpportunities: React.FC = () => {
     skillId: number;
     skillName: string;
   } | null>(null);
+
+  // Fetch saved opportunity IDs for bookmarked UI state
+  const fetchSavedIds = useCallback(async () => {
+    const authToken = token || localStorage.getItem("skillbridge_token");
+    if (!authToken) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/opportunities/saved/ids`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.savedIds)) {
+        setSavedIds(new Set(data.savedIds));
+      }
+    } catch (err) {
+      console.error("fetchSavedIds error:", err);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchSavedIds();
+  }, [fetchSavedIds]);
+
+  const toggleBookmark = async (oppId: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const authToken = token || localStorage.getItem("skillbridge_token");
+    if (!authToken) return;
+
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(oppId)) next.delete(oppId);
+      else next.add(oppId);
+      return next;
+    });
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/opportunities/${oppId}/save`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        fetchSavedIds();
+      }
+    } catch (_err) {
+      fetchSavedIds();
+    }
+  };
 
   // Fetch Recommended Opportunities
   const fetchRecommendations = useCallback(async () => {
@@ -84,6 +136,13 @@ const StudentOpportunities: React.FC = () => {
     try {
       let url = `${API_BASE_URL}/opportunities`;
       const params = new URLSearchParams();
+      
+      if (isAcademicianRole) {
+        params.append("audience", "ACADEMICIAN");
+      } else {
+        params.append("audience", "STUDENT");
+      }
+
       if (typeFilter !== "all") params.append("type", typeFilter);
       if (searchTerm.trim()) params.append("search", searchTerm.trim());
 
@@ -105,7 +164,7 @@ const StudentOpportunities: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [typeFilter, searchTerm]);
+  }, [typeFilter, searchTerm, isAcademicianRole]);
 
   useEffect(() => {
     if (viewMode === "recommended") {
@@ -117,7 +176,7 @@ const StudentOpportunities: React.FC = () => {
 
   const formatStipend = (min: number | null, max: number | null, type: string) => {
     if (!min && !max) return "Disclosed on interview";
-    const unit = type === "internship" ? "/month" : "/annum";
+    const unit = type === "internship" || type === "faculty_internship" ? "/month" : "/annum";
     if (min && max) return `₹${min.toLocaleString()} - ₹${max.toLocaleString()} ${unit}`;
     if (min) return `From ₹${min.toLocaleString()} ${unit}`;
     if (max) return `Up to ₹${max.toLocaleString()} ${unit}`;
@@ -200,41 +259,45 @@ const StudentOpportunities: React.FC = () => {
               </div>
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
-                  Skill DNA & Recommendations
+                  {isAcademicianRole ? "Academia & Industry Ecosystem" : "Skill Profile & Recommendations"}
                 </span>
                 <h1 className="text-2xl font-bold text-slate-100 mt-0.5">
-                  Opportunity Discovery
+                  {isAcademicianRole ? "Academician Industry Opportunities" : "Opportunity Discovery"}
                 </h1>
                 <p className="text-sm text-slate-400 mt-1">
-                  Explore ranked opportunity recommendations matched against your verified skills.
+                  {isAcademicianRole
+                    ? "Explore industry internships, industrial training, FDPs, consultancy projects, research collaborations, and guest lectures."
+                    : "Explore ranked opportunity recommendations matched against your verified skills."}
                 </p>
               </div>
             </div>
 
             {/* TAB SELECTOR */}
-            <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl shrink-0">
-              <button
-                onClick={() => setViewMode("recommended")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "recommended"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <Target size={15} /> Recommended for You
-              </button>
+            {!isAcademicianRole && (
+              <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl shrink-0">
+                <button
+                  onClick={() => setViewMode("recommended")}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    viewMode === "recommended"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                >
+                  <Target size={15} /> Recommended for You
+                </button>
 
-              <button
-                onClick={() => setViewMode("all")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "all"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <Globe size={15} /> All Opportunities
-              </button>
-            </div>
+                <button
+                  onClick={() => setViewMode("all")}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    viewMode === "all"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                >
+                  <Globe size={15} /> All Opportunities
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -244,46 +307,113 @@ const StudentOpportunities: React.FC = () => {
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by role title, technology, or company name..."
+              placeholder="Search by title, technology, domain, or company name..."
               className="w-full bg-slate-800/50 border border-slate-700/60 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-400 text-sm rounded-xl pl-10 pr-4 py-2.5 transition-all outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-950/60 border border-slate-800/80 rounded-xl">
             <button
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 typeFilter === "all"
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
               }`}
               onClick={() => setTypeFilter("all")}
             >
-              All Roles
+              All Types
             </button>
 
-            <button
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                typeFilter === "internship"
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-              }`}
-              onClick={() => setTypeFilter("internship")}
-            >
-              <GraduationCap size={14} /> Internships
-            </button>
+            {!isAcademicianRole ? (
+              <>
+                <button
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "internship"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("internship")}
+                >
+                  <GraduationCap size={14} /> Internships
+                </button>
 
-            <button
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                typeFilter === "job"
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-              }`}
-              onClick={() => setTypeFilter("job")}
-            >
-              <Briefcase size={14} /> Full-Time Jobs
-            </button>
+                <button
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "job"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("job")}
+                >
+                  <Briefcase size={14} /> Jobs
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "faculty_internship"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("faculty_internship")}
+                >
+                  Faculty Internships
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "industrial_training"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("industrial_training")}
+                >
+                  Industrial Training
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "fdp"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("fdp")}
+                >
+                  FDPs
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "consultancy"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("consultancy")}
+                >
+                  Consultancy
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "research_collaboration"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("research_collaboration")}
+                >
+                  Research
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    typeFilter === "guest_lecture"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                  onClick={() => setTypeFilter("guest_lecture")}
+                >
+                  Guest Lectures
+                </button>
+              </>
+            )}
 
             <button
               onClick={() => (viewMode === "recommended" ? fetchRecommendations() : fetchAllOpportunities())}
@@ -358,15 +488,28 @@ const StudentOpportunities: React.FC = () => {
                         </div>
                       </div>
 
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                          rec.type === "internship"
-                            ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
-                            : "bg-purple-500/15 border border-purple-500/30 text-purple-400"
-                        }`}
-                      >
-                        {rec.type === "internship" ? "Internship" : "Full-Time"}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            rec.type === "internship"
+                              ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
+                              : "bg-purple-500/15 border border-purple-500/30 text-purple-400"
+                          }`}
+                        >
+                          {rec.type === "internship" ? "Internship" : "Full-Time"}
+                        </span>
+                        <button
+                          onClick={(e) => toggleBookmark(rec.opportunityId, e)}
+                          className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                            savedIds.has(rec.opportunityId)
+                              ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                              : "bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                          }`}
+                          title={savedIds.has(rec.opportunityId) ? "Remove from saved" : "Save opportunity"}
+                        >
+                          <Bookmark size={14} className={savedIds.has(rec.opportunityId) ? "fill-amber-400 text-amber-400" : ""} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* PROMINENT MATCH SCORE */}
@@ -528,15 +671,28 @@ const StudentOpportunities: React.FC = () => {
                         </div>
                       </div>
 
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider shrink-0 ${
-                          opp.type === "internship"
-                            ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
-                            : "bg-purple-500/15 border border-purple-500/30 text-purple-400"
-                        }`}
-                      >
-                        {opp.type === "internship" ? "Internship" : "Full-Time Job"}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                            opp.type === "internship"
+                              ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
+                              : "bg-purple-500/15 border border-purple-500/30 text-purple-400"
+                          }`}
+                        >
+                          {opp.type === "internship" ? "Internship" : "Full-Time Job"}
+                        </span>
+                        <button
+                          onClick={(e) => toggleBookmark(opp.id, e)}
+                          className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                            savedIds.has(opp.id)
+                              ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                              : "bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                          }`}
+                          title={savedIds.has(opp.id) ? "Remove from saved" : "Save opportunity"}
+                        >
+                          <Bookmark size={14} className={savedIds.has(opp.id) ? "fill-amber-400 text-amber-400" : ""} />
+                        </button>
+                      </div>
                     </div>
 
                     <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">

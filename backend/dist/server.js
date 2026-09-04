@@ -13,7 +13,9 @@ import matchingRoutes from "./routes/matching.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import institutionRoutes from "./routes/institution.routes.js";
 import collaborationRoutes from "./routes/collaboration.routes.js";
-import { initTables } from "./config/initTables.js";
+import learningRoutes from "./routes/learning.routes.js";
+import documentRoutes from "./routes/document.routes.js";
+import experiencesRoutes from "./routes/experiences.routes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,11 +49,10 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-// Initialize DB schema on server start
-initTables();
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/student", profileRoutes);
+app.use("/api", documentRoutes);
 app.use("/api/industry", industryRoutes);
 app.use("/api/institution", institutionRoutes);
 app.use("/api/admin", adminRoutes);
@@ -62,6 +63,8 @@ app.use("/api", matchingRoutes);
 app.use("/api", opportunityRoutes);
 app.use("/api", applicationRoutes);
 app.use("/api", collaborationRoutes);
+app.use("/api", learningRoutes);
+app.use("/api/student", experiencesRoutes);
 // Health check
 app.get("/api/health", (_req, res) => {
     res.status(200).json({ status: "healthy", timestamp: new Date() });
@@ -70,7 +73,6 @@ app.get("/api/health", (_req, res) => {
 app.use((_req, res) => {
     res.status(404).json({ error: "Endpoint not found on SkillBridge API server" });
 });
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-    await initTables();
 });

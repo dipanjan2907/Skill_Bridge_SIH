@@ -9,8 +9,6 @@ import {
   Award,
   FileText,
   Edit3,
-  Download,
-  Share2,
   CheckCircle2,
   Globe,
   Code,
@@ -42,8 +40,15 @@ import type {
 
 import { API_BASE_URL } from "../config/api";
 import { InstitutionSelectCombobox } from "../components/common/InstitutionSelectCombobox";
+import { DigitalDocumentsManager } from "../components/student/DigitalDocumentsManager";
 
-type Tab = "personal" | "academic" | "skills" | "preferences" | "projects";
+type Tab =
+  | "personal"
+  | "academic"
+  | "skills"
+  | "preferences"
+  | "projects"
+  | "documents";
 
 const Profile: React.FC = () => {
   const { token } = useAuth();
@@ -51,15 +56,32 @@ const Profile: React.FC = () => {
 
   const initialTab = (searchParams.get("tab") as Tab) || "personal";
   const [activeTab, setActiveTab] = useState<Tab>(
-    ["personal", "academic", "skills", "preferences", "projects"].includes(initialTab)
+    [
+      "personal",
+      "academic",
+      "skills",
+      "preferences",
+      "projects",
+      "documents",
+    ].includes(initialTab)
       ? initialTab
-      : "personal"
+      : "personal",
   );
 
   // Sync tab state when URL query search parameters change
   useEffect(() => {
     const tabParam = searchParams.get("tab") as Tab;
-    if (tabParam && ["personal", "academic", "skills", "preferences", "projects"].includes(tabParam)) {
+    if (
+      tabParam &&
+      [
+        "personal",
+        "academic",
+        "skills",
+        "preferences",
+        "projects",
+        "documents",
+      ].includes(tabParam)
+    ) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -71,7 +93,8 @@ const Profile: React.FC = () => {
   const [data, setData] = useState<ProfileApiResponse | null>(null);
   const [formData, setFormData] = useState<StudentProfileData | null>(null);
   const [targetRolesInput, setTargetRolesInput] = useState<string>("");
-  const [preferredLocationsInput, setPreferredLocationsInput] = useState<string>("");
+  const [preferredLocationsInput, setPreferredLocationsInput] =
+    useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +104,9 @@ const Profile: React.FC = () => {
   const [masterSkills, setMasterSkills] = useState<MasterSkill[]>([]);
   const [selectedSkillId, setSelectedSkillId] = useState<number | "">("");
   const [skillAddLoading, setSkillAddLoading] = useState(false);
-  const [skillActionMessage, setSkillActionMessage] = useState<string | null>(null);
+  const [skillActionMessage, setSkillActionMessage] = useState<string | null>(
+    null,
+  );
   const [skillActionError, setSkillActionError] = useState<string | null>(null);
 
   // Active Assessment state
@@ -114,6 +139,17 @@ const Profile: React.FC = () => {
   const [addProjLoading, setAddProjLoading] = useState(false);
   const [addProjError, setAddProjError] = useState<string | null>(null);
 
+  // Add Certification Modal State
+  const [showAddCertModal, setShowAddCertModal] = useState(false);
+  const [newCertData, setNewCertData] = useState({
+    title: "",
+    issuer: "",
+    issueYear: new Date().getFullYear().toString(),
+    credentialUrl: "",
+  });
+  const [addCertLoading, setAddCertLoading] = useState(false);
+  const [addCertError, setAddCertError] = useState<string | null>(null);
+
   // Fetch master institutions & master skills on load
   useEffect(() => {
     fetch(`${API_BASE_URL}/student/institutions`)
@@ -132,64 +168,104 @@ const Profile: React.FC = () => {
    * GET PROFILE
    * ============================================================
    */
-  const fetchProfile = useCallback(async () => {
-    try {
-      const authToken = token || localStorage.getItem("skillbridge_token");
+  const fetchProfile = useCallback(
+    async (forceRefresh = false) => {
+      try {
+        if (!forceRefresh) {
+          const cached = sessionStorage.getItem("sb_student_profile");
+          if (cached) {
+            try {
+              const parsed: ProfileApiResponse = JSON.parse(cached);
+              if (parsed && parsed.profile) {
+                setData(parsed);
+                const rolesArray = Array.isArray(parsed.profile.target_roles)
+                  ? [...parsed.profile.target_roles]
+                  : [];
+                const locationsArray = Array.isArray(
+                  parsed.profile.preferred_locations,
+                )
+                  ? [...parsed.profile.preferred_locations]
+                  : [];
 
-      if (!authToken) {
-        throw new Error("No authentication token found. Please sign in again.");
-      }
+                setFormData({
+                  ...parsed.profile,
+                  target_roles: rolesArray,
+                  preferred_locations: locationsArray,
+                });
 
-      const response = await fetch(`${API_BASE_URL}/student/profile`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+                setTargetRolesInput(rolesArray.join(", "));
+                setPreferredLocationsInput(locationsArray.join(", "));
+                setError(null);
+                setLoading(false);
+                return;
+              }
+            } catch (_e) {}
+          }
+        }
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+        const authToken = token || localStorage.getItem("skillbridge_token");
 
-        throw new Error(
-          errorData?.error ||
-            `Failed to load profile. Server returned ${response.status}.`,
+        if (!authToken) {
+          throw new Error(
+            "No authentication token found. Please sign in again.",
+          );
+        }
+
+        const response = await fetch(`${API_BASE_URL}/student/profile`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+
+          throw new Error(
+            errorData?.error ||
+              `Failed to load profile. Server returned ${response.status}.`,
+          );
+        }
+
+        const result: ProfileApiResponse = await response.json();
+
+        if (!result || !result.profile) {
+          throw new Error("Invalid profile response received from server.");
+        }
+
+        sessionStorage.setItem("sb_student_profile", JSON.stringify(result));
+        setData(result);
+
+        const rolesArray = Array.isArray(result.profile.target_roles)
+          ? [...result.profile.target_roles]
+          : [];
+        const locationsArray = Array.isArray(result.profile.preferred_locations)
+          ? [...result.profile.preferred_locations]
+          : [];
+
+        setFormData({
+          ...result.profile,
+          target_roles: rolesArray,
+          preferred_locations: locationsArray,
+        });
+
+        setTargetRolesInput(rolesArray.join(", "));
+        setPreferredLocationsInput(locationsArray.join(", "));
+
+        setError(null);
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load student profile.",
         );
+      } finally {
+        setLoading(false);
       }
-
-      const result: ProfileApiResponse = await response.json();
-
-      if (!result || !result.profile) {
-        throw new Error("Invalid profile response received from server.");
-      }
-
-      setData(result);
-
-      const rolesArray = Array.isArray(result.profile.target_roles)
-        ? [...result.profile.target_roles]
-        : [];
-      const locationsArray = Array.isArray(result.profile.preferred_locations)
-        ? [...result.profile.preferred_locations]
-        : [];
-
-      setFormData({
-        ...result.profile,
-        target_roles: rolesArray,
-        preferred_locations: locationsArray,
-      });
-
-      setTargetRolesInput(rolesArray.join(", "));
-      setPreferredLocationsInput(locationsArray.join(", "));
-
-      setError(null);
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load student profile.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+    },
+    [token],
+  );
 
   /*
    * ============================================================
@@ -287,7 +363,7 @@ const Profile: React.FC = () => {
         );
       }
 
-      await fetchProfile();
+      await fetchProfile(true);
       window.dispatchEvent(new Event("profileUpdated"));
 
       setIsEditing(false);
@@ -333,17 +409,18 @@ const Profile: React.FC = () => {
    * ============================================================
    */
   const selectedMasterSkill = masterSkills.find(
-    (s) => s.id === Number(selectedSkillId)
+    (s) => s.id === Number(selectedSkillId),
   );
   const autoCategory = selectedMasterSkill ? selectedMasterSkill.category : "";
 
   const isSkillAlreadyAdded = Boolean(
     selectedSkillId &&
-      data?.skills?.some(
-        (s) =>
-          s.skill_id === Number(selectedSkillId) ||
-          (selectedMasterSkill && s.name.toLowerCase() === selectedMasterSkill.name.toLowerCase())
-      )
+    data?.skills?.some(
+      (s) =>
+        s.skill_id === Number(selectedSkillId) ||
+        (selectedMasterSkill &&
+          s.name.toLowerCase() === selectedMasterSkill.name.toLowerCase()),
+    ),
   );
 
   const handleAddSkill = async (e: React.FormEvent) => {
@@ -376,9 +453,11 @@ const Profile: React.FC = () => {
         throw new Error(resData.error || "Failed to add skill.");
       }
 
-      setSkillActionMessage(`Skill "${selectedMasterSkill?.name}" added successfully!`);
+      setSkillActionMessage(
+        `Skill "${selectedMasterSkill?.name}" added successfully!`,
+      );
       setSelectedSkillId("");
-      await fetchProfile();
+      await fetchProfile(true);
       window.dispatchEvent(new Event("profileUpdated"));
     } catch (err: any) {
       setSkillActionError(err.message || "Error adding skill");
@@ -387,7 +466,10 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleDeleteSkill = async (skillRecordId: number, skillName: string) => {
+  const handleDeleteSkill = async (
+    skillRecordId: number,
+    skillName: string,
+  ) => {
     const authToken = token || localStorage.getItem("skillbridge_token");
     if (!authToken) return;
 
@@ -395,13 +477,16 @@ const Profile: React.FC = () => {
     setSkillActionMessage(null);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/student/skills/${skillRecordId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${API_BASE_URL}/student/skills/${skillRecordId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!res.ok) {
         const resData = await res.json();
@@ -409,7 +494,7 @@ const Profile: React.FC = () => {
       }
 
       setSkillActionMessage(`Skill "${skillName}" removed successfully.`);
-      await fetchProfile();
+      await fetchProfile(true);
       window.dispatchEvent(new Event("profileUpdated"));
     } catch (err: any) {
       setSkillActionError(err.message || "Error removing skill");
@@ -424,7 +509,9 @@ const Profile: React.FC = () => {
   const handleFetchGitHubRepos = async (customUsername?: string) => {
     const usernameToSync = customUsername || formData?.github || "";
     if (!usernameToSync) {
-      setGithubSyncError("Please enter a valid GitHub username or profile URL first.");
+      setGithubSyncError(
+        "Please enter a valid GitHub username or profile URL first.",
+      );
       setShowGitHubModal(true);
       return;
     }
@@ -446,7 +533,9 @@ const Profile: React.FC = () => {
 
       const resData = await res.json();
       if (!res.ok) {
-        throw new Error(resData.error || "Failed to fetch GitHub repositories.");
+        throw new Error(
+          resData.error || "Failed to fetch GitHub repositories.",
+        );
       }
 
       setGithubSyncUsername(resData.username);
@@ -462,12 +551,14 @@ const Profile: React.FC = () => {
 
   const toggleRepoSelection = (id: number) => {
     setSelectedRepoIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
   const handleImportSelectedRepos = async () => {
-    const selectedRepos = githubSyncRepos.filter((r) => selectedRepoIds.includes(r.id));
+    const selectedRepos = githubSyncRepos.filter((r) =>
+      selectedRepoIds.includes(r.id),
+    );
     if (selectedRepos.length === 0) {
       setGithubSyncError("Please select at least one repository to import.");
       return;
@@ -478,22 +569,27 @@ const Profile: React.FC = () => {
 
     try {
       const authToken = token || localStorage.getItem("skillbridge_token");
-      const res = await fetch(`${API_BASE_URL}/student/profile/import-github-projects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${API_BASE_URL}/student/profile/import-github-projects`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ repos: selectedRepos }),
         },
-        body: JSON.stringify({ repos: selectedRepos }),
-      });
+      );
 
       const resData = await res.json();
       if (!res.ok) {
         throw new Error(resData.error || "Failed to import GitHub projects.");
       }
 
-      setImportSuccessMsg(resData.message || "GitHub projects successfully imported!");
-      await fetchProfile();
+      setImportSuccessMsg(
+        resData.message || "GitHub projects successfully imported!",
+      );
+      await fetchProfile(true);
       window.dispatchEvent(new Event("profileUpdated"));
 
       setTimeout(() => {
@@ -542,7 +638,8 @@ const Profile: React.FC = () => {
         status: "Completed",
       });
       setShowAddProjectModal(false);
-      await fetchProfile();
+      await fetchProfile(true);
+      window.dispatchEvent(new Event("profileUpdated"));
     } catch (err: any) {
       setAddProjError(err.message || "Error creating project.");
     } finally {
@@ -555,21 +652,100 @@ const Profile: React.FC = () => {
     if (!authToken) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/student/profile/projects/${projectId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
+      const res = await fetch(
+        `${API_BASE_URL}/student/profile/projects/${projectId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         },
-      });
+      );
 
       if (!res.ok) {
         const resData = await res.json();
         throw new Error(resData.error || "Failed to delete project.");
       }
 
-      await fetchProfile();
+      await fetchProfile(true);
+      window.dispatchEvent(new Event("profileUpdated"));
     } catch (err: any) {
       alert(err.message || "Error deleting project.");
+    }
+  };
+
+  const handleAddCert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCertData.title || !newCertData.issuer) {
+      setAddCertError("Certification Title and Issuing Organization are required.");
+      return;
+    }
+
+    setAddCertLoading(true);
+    setAddCertError(null);
+
+    try {
+      const authToken = token || localStorage.getItem("skillbridge_token");
+      const res = await fetch(`${API_BASE_URL}/student/experiences/certifications`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newCertData.title,
+          issuer: newCertData.issuer,
+          issueYear: newCertData.issueYear,
+          credentialUrl: newCertData.credentialUrl,
+        }),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || resData.error || "Failed to add certification.");
+      }
+
+      setNewCertData({
+        title: "",
+        issuer: "",
+        issueYear: new Date().getFullYear().toString(),
+        credentialUrl: "",
+      });
+      setShowAddCertModal(false);
+      await fetchProfile(true);
+      window.dispatchEvent(new Event("profileUpdated"));
+    } catch (err: any) {
+      setAddCertError(err.message || "Error creating certification.");
+    } finally {
+      setAddCertLoading(false);
+    }
+  };
+
+  const handleDeleteCert = async (certId: number) => {
+    if (!window.confirm("Are you sure you want to delete this certification?")) return;
+    const authToken = token || localStorage.getItem("skillbridge_token");
+    if (!authToken) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/student/experiences/certifications/${certId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const resData = await res.json();
+        throw new Error(resData.message || resData.error || "Failed to delete certification.");
+      }
+
+      await fetchProfile(true);
+      window.dispatchEvent(new Event("profileUpdated"));
+    } catch (err: any) {
+      alert(err.message || "Error deleting certification.");
     }
   };
 
@@ -593,21 +769,51 @@ const Profile: React.FC = () => {
         <AlertCircle size={44} color="#ef4444" />
         <h2>Failed to Load Profile</h2>
         <p>{error || "No student profile data found in database."}</p>
-        <button onClick={fetchProfile} className="retry-btn">
+        <button onClick={() => fetchProfile()} className="retry-btn">
           Retry Loading
         </button>
       </div>
     );
   }
 
-  const initials = formData.name
-    ? formData.name
-        .split(" ")
-        .map((part) => part[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
-    : "ST";
+  const getInitials = (name?: string): string => {
+    if (!name || !name.trim()) return "ST";
+    const titles = new Set([
+      "dr",
+      "dr.",
+      "mr",
+      "mr.",
+      "mrs",
+      "mrs.",
+      "ms",
+      "ms.",
+      "prof",
+      "prof.",
+      "er",
+      "er.",
+      "shri",
+      "smt",
+      "sir",
+      "madam",
+    ]);
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter((part) => !titles.has(part.toLowerCase()));
+
+    if (parts.length === 0) {
+      const raw = name.replace(/[^a-zA-Z]/g, "");
+      return raw.substring(0, 2).toUpperCase() || "ST";
+    }
+
+    if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const initials = getInitials(formData.name);
 
   return (
     <div className="profile-page-wrapper">
@@ -627,8 +833,6 @@ const Profile: React.FC = () => {
         <div className="cover-content">
           <div className="avatar-section">
             <div className="main-avatar">{initials}</div>
-
-            <span className="online-indicator" title="Database Connected" />
           </div>
 
           <div className="identity-section">
@@ -703,14 +907,6 @@ const Profile: React.FC = () => {
                 </button>
               </>
             )}
-
-            <button className="btn-icon" title="Download Resume">
-              <Download size={16} />
-            </button>
-
-            <button className="btn-icon" title="Share Profile">
-              <Share2 size={16} />
-            </button>
           </div>
         </div>
       </div>
@@ -744,7 +940,9 @@ const Profile: React.FC = () => {
             <div className="stat-label">Academic CGPA</div>
 
             <div className="stat-value">
-              {formData.cgpa !== null && formData.cgpa !== undefined && String(formData.cgpa).trim() !== ""
+              {formData.cgpa !== null &&
+              formData.cgpa !== undefined &&
+              String(formData.cgpa).trim() !== ""
                 ? Number(formData.cgpa).toFixed(2)
                 : "N/A"}
             </div>
@@ -807,7 +1005,7 @@ const Profile: React.FC = () => {
           onClick={() => setActiveTab("skills")}
         >
           <Award size={16} />
-          Skill DNA & Badges
+          Skill Matrix & Badges
         </button>
 
         <button
@@ -824,6 +1022,14 @@ const Profile: React.FC = () => {
         >
           <Code size={16} />
           Projects & Credentials
+        </button>
+
+        <button
+          className={activeTab === "documents" ? "active" : ""}
+          onClick={() => setActiveTab("documents")}
+        >
+          <FileText size={16} />
+          Digital Documents
         </button>
       </div>
 
@@ -1017,7 +1223,13 @@ const Profile: React.FC = () => {
             {!isEditing && (
               <div style={{ marginTop: "2rem" }}>
                 <div className="sub-section-title">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <h3
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
                     <Code size={18} className="text-primary" />
                     Developer Accounts & Connected Profiles
                   </h3>
@@ -1028,9 +1240,7 @@ const Profile: React.FC = () => {
                   <div className="account-card">
                     <div className="account-card-header">
                       <div className="account-info">
-                        <div className="account-icon-wrapper github-bg">
-                          GH
-                        </div>
+                        <div className="account-icon-wrapper github-bg">GH</div>
                         <div className="account-details">
                           <strong>GitHub Account</strong>
                           <p>{formData.github || "Not connected"}</p>
@@ -1066,7 +1276,12 @@ const Profile: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="project-link-btn"
-                          style={{ padding: "0.5rem 0.8rem", background: "var(--bg-card)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)" }}
+                          style={{
+                            padding: "0.5rem 0.8rem",
+                            background: "var(--bg-card)",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid var(--border-color)",
+                          }}
                         >
                           <ExternalLink size={13} /> View GitHub
                         </a>
@@ -1107,7 +1322,12 @@ const Profile: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="project-link-btn"
-                          style={{ padding: "0.5rem 0.8rem", background: "var(--bg-card)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)" }}
+                          style={{
+                            padding: "0.5rem 0.8rem",
+                            background: "var(--bg-card)",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid var(--border-color)",
+                          }}
                         >
                           <ExternalLink size={13} /> View Profile ↗
                         </a>
@@ -1116,7 +1336,10 @@ const Profile: React.FC = () => {
                           type="button"
                           className="btn-secondary"
                           onClick={() => setIsEditing(true)}
-                          style={{ fontSize: "0.8rem", padding: "0.45rem 0.85rem" }}
+                          style={{
+                            fontSize: "0.8rem",
+                            padding: "0.45rem 0.85rem",
+                          }}
                         >
                           + Connect LinkedIn
                         </button>
@@ -1157,7 +1380,12 @@ const Profile: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="project-link-btn"
-                          style={{ padding: "0.5rem 0.8rem", background: "var(--bg-card)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)" }}
+                          style={{
+                            padding: "0.5rem 0.8rem",
+                            background: "var(--bg-card)",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid var(--border-color)",
+                          }}
                         >
                           <ExternalLink size={13} /> Visit Site ↗
                         </a>
@@ -1166,7 +1394,10 @@ const Profile: React.FC = () => {
                           type="button"
                           className="btn-secondary"
                           onClick={() => setIsEditing(true)}
-                          style={{ fontSize: "0.8rem", padding: "0.45rem 0.85rem" }}
+                          style={{
+                            fontSize: "0.8rem",
+                            padding: "0.45rem 0.85rem",
+                          }}
                         >
                           + Add Portfolio
                         </button>
@@ -1199,7 +1430,13 @@ const Profile: React.FC = () => {
                 <label>Institution Name (Relational DB Linked)</label>
 
                 {isEditing ? (
-                  <div style={{ display: "flex", gap: "0.5rem", flexDirection: "column" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      flexDirection: "column",
+                    }}
+                  >
                     <InstitutionSelectCombobox
                       institutions={institutions}
                       selectedId={formData.institution_id}
@@ -1209,9 +1446,11 @@ const Profile: React.FC = () => {
                             ? {
                                 ...prev,
                                 institution_id: inst ? inst.id : undefined,
-                                institution: inst ? inst.name : prev.institution,
+                                institution: inst
+                                  ? inst.name
+                                  : prev.institution,
                               }
-                            : null
+                            : null,
                         );
                       }}
                       placeholder="Search registered university or college..."
@@ -1281,6 +1520,25 @@ const Profile: React.FC = () => {
                 )}
               </div>
 
+              {/* STUDENT ID */}
+              <div className="form-group">
+                <label>Student ID</label>
+
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="student_id"
+                    value={formData.student_id ?? ""}
+                    onChange={handleInputChange}
+                    placeholder="e.g. STU20260042 or JISU25CSE014"
+                  />
+                ) : (
+                  <span className="field-value">
+                    {formData.student_id || "Not provided"}
+                  </span>
+                )}
+              </div>
+
               {/* CURRENT SEMESTER */}
               <div className="form-group">
                 <label>Current Semester / Year</label>
@@ -1316,7 +1574,9 @@ const Profile: React.FC = () => {
                   />
                 ) : (
                   <span className="field-value highlight">
-                    {formData.cgpa !== null && formData.cgpa !== undefined && String(formData.cgpa).trim() !== ""
+                    {formData.cgpa !== null &&
+                    formData.cgpa !== undefined &&
+                    String(formData.cgpa).trim() !== ""
                       ? `${Number(formData.cgpa).toFixed(2)} / 10`
                       : "Not specified"}
                   </span>
@@ -1353,11 +1613,12 @@ const Profile: React.FC = () => {
             <div className="card-header">
               <h2>
                 <Sparkles size={20} />
-                Skill DNA & Mastery
+                Skill Matrix & Mastery
               </h2>
 
               <p>
-                Add, manage, and verify your skills stored dynamically in the relational database.
+                Add, manage, and verify your skills stored dynamically in the
+                relational database.
               </p>
             </div>
 
@@ -1375,7 +1636,9 @@ const Profile: React.FC = () => {
                     className="skill-select-input"
                     value={selectedSkillId}
                     onChange={(e) => {
-                      setSelectedSkillId(e.target.value === "" ? "" : Number(e.target.value));
+                      setSelectedSkillId(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      );
                       setSkillActionError(null);
                       setSkillActionMessage(null);
                     }}
@@ -1392,8 +1655,12 @@ const Profile: React.FC = () => {
                 {/* 2. AUTOMATIC READ-ONLY CATEGORY DISPLAY */}
                 <div className="skill-field-group">
                   <label>Category (Auto-assigned)</label>
-                  <div className={`skill-category-display ${!autoCategory ? "empty" : ""}`}>
-                    {autoCategory ? autoCategory : "Auto-filled upon skill selection"}
+                  <div
+                    className={`skill-category-display ${!autoCategory ? "empty" : ""}`}
+                  >
+                    {autoCategory
+                      ? autoCategory
+                      : "Auto-filled upon skill selection"}
                   </div>
                 </div>
 
@@ -1401,22 +1668,33 @@ const Profile: React.FC = () => {
                 <div>
                   <button
                     type="submit"
-                    disabled={!selectedSkillId || isSkillAlreadyAdded || skillAddLoading}
+                    disabled={
+                      !selectedSkillId || isSkillAlreadyAdded || skillAddLoading
+                    }
                     style={{
                       padding: "0.6rem 1.2rem",
                       borderRadius: "8px",
-                      background: isSkillAlreadyAdded ? "#6b7280" : "var(--primary-color, #6366f1)",
+                      background: isSkillAlreadyAdded
+                        ? "#6b7280"
+                        : "var(--primary-color, #6366f1)",
                       color: "#ffffff",
                       border: "none",
                       fontWeight: 600,
                       cursor:
-                        !selectedSkillId || isSkillAlreadyAdded || skillAddLoading
+                        !selectedSkillId ||
+                        isSkillAlreadyAdded ||
+                        skillAddLoading
                           ? "not-allowed"
                           : "pointer",
                       display: "flex",
                       alignItems: "center",
                       gap: "0.4rem",
-                      opacity: !selectedSkillId || isSkillAlreadyAdded || skillAddLoading ? 0.7 : 1,
+                      opacity:
+                        !selectedSkillId ||
+                        isSkillAlreadyAdded ||
+                        skillAddLoading
+                          ? 0.7
+                          : 1,
                       width: "100%",
                       justifyContent: "center",
                     }}
@@ -1475,19 +1753,32 @@ const Profile: React.FC = () => {
                   color: "var(--text-muted)",
                 }}
               >
-                <Sparkles size={30} style={{ margin: "0 auto 0.75rem", opacity: 0.5 }} />
-                <p>No skills added to your profile yet. Select a skill above to add one!</p>
+                <Sparkles
+                  size={30}
+                  style={{ margin: "0 auto 0.75rem", opacity: 0.5 }}
+                />
+                <p>
+                  No skills added to your profile yet. Select a skill above to
+                  add one!
+                </p>
               </div>
             ) : (
               <div className="skills-dna-grid">
                 {data.skills.map((skill) => {
-                  const normName = skill.name.toLowerCase().replace("&", "and").trim();
+                  const normName = skill.name
+                    .toLowerCase()
+                    .replace("&", "and")
+                    .trim();
                   const masterMatch = masterSkills.find((m) => {
                     if (m.id === skill.skill_id) return true;
-                    const mNorm = m.name.toLowerCase().replace("&", "and").trim();
+                    const mNorm = m.name
+                      .toLowerCase()
+                      .replace("&", "and")
+                      .trim();
                     return mNorm === normName;
                   });
-                  const targetSkillId = skill.skill_id || (masterMatch ? masterMatch.id : skill.id);
+                  const targetSkillId =
+                    skill.skill_id || (masterMatch ? masterMatch.id : skill.id);
 
                   return (
                     <div key={skill.id} className="skill-meter-card">
@@ -1499,8 +1790,23 @@ const Profile: React.FC = () => {
                           alignItems: "center",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", flexWrap: "wrap" }}>
-                          <span style={{ fontWeight: 600, fontSize: "0.95rem", lineHeight: 1.2, display: "inline-flex", alignItems: "center" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.55rem",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              fontSize: "0.95rem",
+                              lineHeight: 1.2,
+                              display: "inline-flex",
+                              alignItems: "center",
+                            }}
+                          >
                             {skill.name}
                           </span>
                           {skill.category && (
@@ -1514,7 +1820,9 @@ const Profile: React.FC = () => {
                                     ? "rgba(236, 72, 153, 0.15)"
                                     : "rgba(99, 102, 241, 0.15)",
                                 color:
-                                  skill.category === "Soft Skill" ? "#ec4899" : "#6366f1",
+                                  skill.category === "Soft Skill"
+                                    ? "#ec4899"
+                                    : "#6366f1",
                                 fontWeight: 600,
                                 display: "inline-flex",
                                 alignItems: "center",
@@ -1527,12 +1835,37 @@ const Profile: React.FC = () => {
                           )}
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
-                            Proficiency Score: <b style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "0.9rem" }}>{skill.proficiency_score}%</b>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.78rem",
+                              color: "var(--text-muted)",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.3rem",
+                            }}
+                          >
+                            Proficiency Score:{" "}
+                            <b
+                              style={{
+                                color: "var(--text-primary)",
+                                fontWeight: 700,
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              {skill.proficiency_score}%
+                            </b>
                           </span>
                           <button
-                            onClick={() => handleDeleteSkill(skill.id, skill.name)}
+                            onClick={() =>
+                              handleDeleteSkill(skill.id, skill.name)
+                            }
                             title="Remove Skill"
                             style={{
                               background: "transparent",
@@ -1549,8 +1882,13 @@ const Profile: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="skill-progress-bar" style={{ marginTop: "0.6rem" }}>
-                        <span style={{ width: `${skill.proficiency_score}%` }} />
+                      <div
+                        className="skill-progress-bar"
+                        style={{ marginTop: "0.6rem" }}
+                      >
+                        <span
+                          style={{ width: `${skill.proficiency_score}%` }}
+                        />
                       </div>
 
                       <div
@@ -1569,14 +1907,19 @@ const Profile: React.FC = () => {
                             alignItems: "center",
                             gap: "0.25rem",
                             color:
-                              skill.verification_source === "Verified Assessment"
+                              skill.verification_source ===
+                              "Verified Assessment"
                                 ? "#10b981"
                                 : "var(--text-muted)",
                             fontWeight:
-                              skill.verification_source === "Verified Assessment" ? 600 : 400,
+                              skill.verification_source ===
+                              "Verified Assessment"
+                                ? 600
+                                : 400,
                           }}
                         >
-                          {skill.verification_source === "Verified Assessment" && (
+                          {skill.verification_source ===
+                            "Verified Assessment" && (
                             <CheckCircle2 size={13} color="#10b981" />
                           )}
                           {skill.verification_source || "Self Reported"}
@@ -1608,15 +1951,20 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="badges-flex">
-              {data.skills?.filter((skill) => skill.is_badge_earned).length === 0 ? (
+              {data.skills?.filter((skill) => skill.is_badge_earned).length ===
+              0 ? (
                 <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                  No verified skill badges earned yet. Complete assessments to earn badges!
+                  No verified skill badges earned yet. Complete assessments to
+                  earn badges!
                 </p>
               ) : (
                 data.skills
                   .filter((skill) => skill.is_badge_earned)
                   .map((skill) => (
-                    <div key={`badge-${skill.id}`} className="badge-chip emerald">
+                    <div
+                      key={`badge-${skill.id}`}
+                      className="badge-chip emerald"
+                    >
                       <CheckCircle2 size={16} />
                       {skill.name}
                     </div>
@@ -1654,8 +2002,13 @@ const Profile: React.FC = () => {
                       onChange={(e) => {
                         const val = e.target.value;
                         setTargetRolesInput(val);
-                        const parsed = val.split(",").map((s) => s.trim()).filter(Boolean);
-                        setFormData((prev) => (prev ? { ...prev, target_roles: parsed } : null));
+                        const parsed = val
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        setFormData((prev) =>
+                          prev ? { ...prev, target_roles: parsed } : null,
+                        );
                       }}
                       placeholder="e.g. Software Engineer, Data Analyst, AI Engineer"
                       rows={3}
@@ -1696,8 +2049,15 @@ const Profile: React.FC = () => {
                       onChange={(e) => {
                         const val = e.target.value;
                         setPreferredLocationsInput(val);
-                        const parsed = val.split(",").map((s) => s.trim()).filter(Boolean);
-                        setFormData((prev) => (prev ? { ...prev, preferred_locations: parsed } : null));
+                        const parsed = val
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        setFormData((prev) =>
+                          prev
+                            ? { ...prev, preferred_locations: parsed }
+                            : null,
+                        );
                       }}
                       placeholder="e.g. Kolkata, Bengaluru, Remote"
                       rows={3}
@@ -1757,13 +2117,22 @@ const Profile: React.FC = () => {
                   <strong>Expected Monthly Stipend</strong>
 
                   {isEditing ? (
-                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        marginTop: "0.4rem",
+                      }}
+                    >
                       <input
                         type="number"
                         placeholder="Min (₹)"
                         value={formData.expected_stipend_min ?? ""}
                         onChange={(e) =>
-                          handleNumberChange("expected_stipend_min", e.target.value)
+                          handleNumberChange(
+                            "expected_stipend_min",
+                            e.target.value,
+                          )
                         }
                       />
                       <input
@@ -1771,13 +2140,17 @@ const Profile: React.FC = () => {
                         placeholder="Max (₹)"
                         value={formData.expected_stipend_max ?? ""}
                         onChange={(e) =>
-                          handleNumberChange("expected_stipend_max", e.target.value)
+                          handleNumberChange(
+                            "expected_stipend_max",
+                            e.target.value,
+                          )
                         }
                       />
                     </div>
                   ) : (
                     <p>
-                      {formData.expected_stipend_min || formData.expected_stipend_max
+                      {formData.expected_stipend_min ||
+                      formData.expected_stipend_max
                         ? `₹${formData.expected_stipend_min?.toLocaleString() || 0} - ₹${formData.expected_stipend_max?.toLocaleString() || "Open"}/mo`
                         : "Negotiable / Open"}
                     </p>
@@ -1793,14 +2166,26 @@ const Profile: React.FC = () => {
         ==================================================== */}
         {activeTab === "projects" && (
           <div className="tab-pane">
-            <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+            <div
+              className="card-header"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                flexWrap: "wrap",
+                gap: "1rem",
+              }}
+            >
               <div>
                 <h2>
                   <Code size={20} />
                   Projects & Portfolio Credentials
                 </h2>
 
-                <p>Manage and synchronize your real developer projects from GitHub & database records.</p>
+                <p>
+                  Manage and synchronize your real developer projects from
+                  GitHub & database records.
+                </p>
               </div>
 
               <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
@@ -1830,13 +2215,41 @@ const Profile: React.FC = () => {
 
             <div className="projects-grid">
               {data.projects?.length === 0 ? (
-                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "2.5rem 1rem", background: "var(--bg-app)", borderRadius: "var(--radius-lg)", border: "1px dashed var(--border-color)" }}>
-                  <Code size={36} style={{ color: "var(--text-muted)", marginBottom: "0.5rem" }} />
-                  <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontWeight: 600 }}>
+                <div
+                  style={{
+                    gridColumn: "1 / -1",
+                    textAlign: "center",
+                    padding: "2.5rem 1rem",
+                    background: "var(--bg-app)",
+                    borderRadius: "var(--radius-lg)",
+                    border: "1px dashed var(--border-color)",
+                  }}
+                >
+                  <Code
+                    size={36}
+                    style={{
+                      color: "var(--text-muted)",
+                      marginBottom: "0.5rem",
+                    }}
+                  />
+                  <p
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: "0.9rem",
+                      fontWeight: 600,
+                    }}
+                  >
                     No projects recorded in your profile yet.
                   </p>
-                  <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "0.25rem" }}>
-                    Click "Sync from GitHub" above to pull your live public repositories automatically!
+                  <p
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: "0.8rem",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    Click "Sync from GitHub" above to pull your live public
+                    repositories automatically!
                   </p>
                 </div>
               ) : (
@@ -1845,14 +2258,24 @@ const Profile: React.FC = () => {
                     <div className="project-top">
                       <h4>{project.title}</h4>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
                         <span className="status-badge">{project.status}</span>
                         <button
                           type="button"
                           className="btn-icon"
                           onClick={() => handleDeleteProject(project.id)}
                           title="Delete Project"
-                          style={{ width: "26px", height: "26px", color: "#ef4444" }}
+                          style={{
+                            width: "26px",
+                            height: "26px",
+                            color: "#ef4444",
+                          }}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -1899,31 +2322,77 @@ const Profile: React.FC = () => {
               )}
             </div>
 
-            <div className="sub-section-title" style={{ marginTop: "2.5rem" }}>
+            <div className="sub-section-title" style={{ marginTop: "2.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3>Certifications & Licenses</h3>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setShowAddCertModal(true)}
+                style={{ fontSize: "0.78rem", padding: "0.4rem 0.8rem" }}
+              >
+                <Plus size={14} />
+                Add Certification
+              </button>
             </div>
 
             <div className="certs-list">
               {data.certifications?.length === 0 ? (
                 <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                  No certifications recorded in the database yet.
+                  No certifications recorded in the database yet. Click "+ Add Certification" to add one.
                 </p>
               ) : (
                 data.certifications.map((cert) => (
-                  <div key={cert.id} className="cert-item">
-                    <Award size={20} className="cert-icon" />
+                  <div key={cert.id} className="cert-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <Award size={20} className="cert-icon" />
 
-                    <div>
-                      <h4>{cert.title}</h4>
+                      <div>
+                        <h4>{cert.title}</h4>
 
-                      <p>
-                        {cert.issuer} • Issued {cert.issue_year}
-                      </p>
+                        <p>
+                          {cert.issuer} {cert.issue_year ? `• Issued ${cert.issue_year}` : ""}
+                        </p>
+                        {cert.credential_url && (
+                          <a
+                            href={cert.credential_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: "0.75rem", color: "var(--color-primary)", textDecoration: "none" }}
+                          >
+                            Verify Credential ↗
+                          </a>
+                        )}
+                      </div>
                     </div>
+
+                    <button
+                      type="button"
+                      className="btn-icon"
+                      onClick={() => handleDeleteCert(cert.id)}
+                      title="Delete Certification"
+                      style={{ color: "#ef4444", padding: "0.3rem" }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 ))
               )}
             </div>
+          </div>
+        )}
+
+        {/* ====================================================
+            DIGITAL DOCUMENTS (RESUMES & CERTIFICATES)
+        ==================================================== */}
+        {activeTab === "documents" && (
+          <div className="tab-pane">
+            <DigitalDocumentsManager
+              token={token}
+              onProfileUpdated={() => {
+                fetchProfile();
+                window.dispatchEvent(new Event("profileUpdated"));
+              }}
+            />
           </div>
         )}
 
@@ -1955,7 +2424,15 @@ const Profile: React.FC = () => {
                     placeholder="Enter GitHub Username or Profile URL..."
                     value={githubSyncUsername || formData?.github || ""}
                     onChange={(e) => setGithubSyncUsername(e.target.value)}
-                    style={{ flex: 1, padding: "0.65rem 0.85rem", background: "var(--bg-app)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-md)", color: "var(--text-primary)", fontSize: "0.88rem" }}
+                    style={{
+                      flex: 1,
+                      padding: "0.65rem 0.85rem",
+                      background: "var(--bg-app)",
+                      border: "1px solid var(--border-color)",
+                      borderRadius: "var(--radius-md)",
+                      color: "var(--text-primary)",
+                      fontSize: "0.88rem",
+                    }}
                   />
                   <button
                     type="button"
@@ -1963,7 +2440,11 @@ const Profile: React.FC = () => {
                     onClick={() => handleFetchGitHubRepos(githubSyncUsername)}
                     disabled={githubSyncLoading}
                   >
-                    {githubSyncLoading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                    {githubSyncLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={16} />
+                    )}
                     Fetch Repos
                   </button>
                 </div>
@@ -1983,28 +2464,66 @@ const Profile: React.FC = () => {
                 )}
 
                 {githubSyncLoading ? (
-                  <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>
-                    <Loader2 size={32} className="animate-spin" style={{ margin: "0 auto 1rem auto" }} />
-                    <p>Connecting to GitHub API & loading public repositories...</p>
+                  <div
+                    style={{
+                      padding: "3rem",
+                      textAlign: "center",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    <Loader2
+                      size={32}
+                      className="animate-spin"
+                      style={{ margin: "0 auto 1rem auto" }}
+                    />
+                    <p>
+                      Connecting to GitHub API & loading public repositories...
+                    </p>
                   </div>
                 ) : githubSyncRepos.length > 0 ? (
                   <>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                        Found {githubSyncRepos.length} public repository(s). Select repos to import:
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text-muted)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Found {githubSyncRepos.length} public repository(s).
+                        Select repos to import:
                       </span>
                       <button
                         type="button"
-                        style={{ background: "none", border: "none", color: "var(--primary-light)", fontSize: "0.8rem", cursor: "pointer", fontWeight: 600 }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--primary-light)",
+                          fontSize: "0.8rem",
+                          cursor: "pointer",
+                          fontWeight: 600,
+                        }}
                         onClick={() => {
-                          if (selectedRepoIds.length === githubSyncRepos.length) {
+                          if (
+                            selectedRepoIds.length === githubSyncRepos.length
+                          ) {
                             setSelectedRepoIds([]);
                           } else {
-                            setSelectedRepoIds(githubSyncRepos.map((r) => r.id));
+                            setSelectedRepoIds(
+                              githubSyncRepos.map((r) => r.id),
+                            );
                           }
                         }}
                       >
-                        {selectedRepoIds.length === githubSyncRepos.length ? "Deselect All" : "Select All"}
+                        {selectedRepoIds.length === githubSyncRepos.length
+                          ? "Deselect All"
+                          : "Select All"}
                       </button>
                     </div>
 
@@ -2033,13 +2552,17 @@ const Profile: React.FC = () => {
                                   </span>
                                 )}
                               </div>
-                              <p className="repo-description">{repo.description}</p>
+                              <p className="repo-description">
+                                {repo.description}
+                              </p>
                               <div className="tech-stack-flex">
-                                {repo.tech_stack?.map((tech: string, i: number) => (
-                                  <span key={i} className="tech-pill">
-                                    {tech}
-                                  </span>
-                                ))}
+                                {repo.tech_stack?.map(
+                                  (tech: string, i: number) => (
+                                    <span key={i} className="tech-pill">
+                                      {tech}
+                                    </span>
+                                  ),
+                                )}
                               </div>
                             </div>
                           </div>
@@ -2049,15 +2572,26 @@ const Profile: React.FC = () => {
                   </>
                 ) : (
                   !githubSyncLoading && (
-                    <div style={{ textAlign: "center", padding: "2rem", color: "var(--text-muted)" }}>
-                      <p>No repositories loaded. Enter a valid GitHub username and click "Fetch Repos".</p>
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      <p>
+                        No repositories loaded. Enter a valid GitHub username
+                        and click "Fetch Repos".
+                      </p>
                     </div>
                   )
                 )}
               </div>
 
               <div className="github-modal-footer">
-                <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                <span
+                  style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}
+                >
                   Selected: {selectedRepoIds.length} project(s)
                 </span>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -2074,7 +2608,11 @@ const Profile: React.FC = () => {
                     onClick={handleImportSelectedRepos}
                     disabled={importLoading || selectedRepoIds.length === 0}
                   >
-                    {importLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {importLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
                     Import to SkillBridge Portfolio
                   </button>
                 </div>
@@ -2119,7 +2657,12 @@ const Profile: React.FC = () => {
                       required
                       placeholder="e.g. AI-Powered Skill Placement Platform"
                       value={newProjData.title}
-                      onChange={(e) => setNewProjData({ ...newProjData, title: e.target.value })}
+                      onChange={(e) =>
+                        setNewProjData({
+                          ...newProjData,
+                          title: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -2129,7 +2672,12 @@ const Profile: React.FC = () => {
                       rows={3}
                       placeholder="Brief overview of the project and core achievements..."
                       value={newProjData.description}
-                      onChange={(e) => setNewProjData({ ...newProjData, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewProjData({
+                          ...newProjData,
+                          description: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -2139,7 +2687,12 @@ const Profile: React.FC = () => {
                       type="text"
                       placeholder="e.g. React, Node.js, TypeScript, MySQL"
                       value={newProjData.tech_stack}
-                      onChange={(e) => setNewProjData({ ...newProjData, tech_stack: e.target.value })}
+                      onChange={(e) =>
+                        setNewProjData({
+                          ...newProjData,
+                          tech_stack: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -2150,7 +2703,12 @@ const Profile: React.FC = () => {
                         type="url"
                         placeholder="https://github.com/username/project"
                         value={newProjData.repo_url}
-                        onChange={(e) => setNewProjData({ ...newProjData, repo_url: e.target.value })}
+                        onChange={(e) =>
+                          setNewProjData({
+                            ...newProjData,
+                            repo_url: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
@@ -2160,7 +2718,12 @@ const Profile: React.FC = () => {
                         type="url"
                         placeholder="https://myproject.app"
                         value={newProjData.project_url}
-                        onChange={(e) => setNewProjData({ ...newProjData, project_url: e.target.value })}
+                        onChange={(e) =>
+                          setNewProjData({
+                            ...newProjData,
+                            project_url: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -2179,8 +2742,130 @@ const Profile: React.FC = () => {
                     className="btn-primary"
                     disabled={addProjLoading}
                   >
-                    {addProjLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {addProjLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
                     Save Project
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ADD CUSTOM CERTIFICATION MODAL */}
+        {showAddCertModal && (
+          <div className="github-modal-overlay">
+            <div className="github-modal-content">
+              <div className="github-modal-header">
+                <h3>
+                  <Award size={20} className="modal-icon text-emerald-400" />
+                  Add Verified Certification
+                </h3>
+                <button
+                  type="button"
+                  className="close-modal-btn"
+                  onClick={() => setShowAddCertModal(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddCert}>
+                <div className="github-modal-body space-y-4">
+                  {addCertError && (
+                    <div className="github-error-banner">
+                      <AlertCircle size={16} />
+                      <span>{addCertError}</span>
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Certification Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. AWS Certified Solutions Architect"
+                      value={newCertData.title}
+                      onChange={(e) =>
+                        setNewCertData({
+                          ...newCertData,
+                          title: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-grid-2">
+                    <div className="form-group">
+                      <label>Issuing Organization *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Amazon Web Services, Coursera, NPTEL"
+                        value={newCertData.issuer}
+                        onChange={(e) =>
+                          setNewCertData({
+                            ...newCertData,
+                            issuer: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Issue Year</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 2024"
+                        value={newCertData.issueYear}
+                        onChange={(e) =>
+                          setNewCertData({
+                            ...newCertData,
+                            issueYear: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Credential Verification URL</label>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={newCertData.credentialUrl}
+                      onChange={(e) =>
+                        setNewCertData({
+                          ...newCertData,
+                          credentialUrl: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="github-modal-footer">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setShowAddCertModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={addCertLoading}
+                  >
+                    {addCertLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    Save Certification
                   </button>
                 </div>
               </form>

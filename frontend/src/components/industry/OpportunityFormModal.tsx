@@ -7,7 +7,6 @@ import {
   Loader2,
   Sparkles,
   Building2,
-  Briefcase,
   GraduationCap,
   MapPin,
   Calendar,
@@ -41,6 +40,7 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
   masterSkills,
   token,
 }) => {
+  const [targetAudience, setTargetAudience] = useState<"STUDENT" | "ACADEMICIAN" | "BOTH">("STUDENT");
   const [type, setType] = useState<OpportunityType>("internship");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -66,6 +66,7 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
 
   useEffect(() => {
     if (opportunityToEdit) {
+      setTargetAudience(opportunityToEdit.target_audience || "STUDENT");
       setType(opportunityToEdit.type || "internship");
       setTitle(opportunityToEdit.title || "");
       setDescription(opportunityToEdit.description || "");
@@ -98,6 +99,7 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
       }
     } else {
       // Reset form
+      setTargetAudience("STUDENT");
       setType("internship");
       setTitle("");
       setDescription("");
@@ -214,6 +216,7 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
     setError(null);
 
     const payload: CreateOpportunityPayload = {
+      targetAudience,
       type,
       title: title.trim(),
       description: description.trim(),
@@ -301,37 +304,127 @@ export const OpportunityFormModal: React.FC<OpportunityFormModalProps> = ({
 
         {/* MODAL SCROLLABLE BODY */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
-          {/* TYPE TOGGLE SELECTOR */}
+          {/* TARGET AUDIENCE SELECTOR */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              Target Audience *
+            </label>
+            <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-950/60 border border-slate-800 rounded-xl">
+              <button
+                type="button"
+                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  targetAudience === "STUDENT"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                }`}
+                onClick={() => {
+                  setTargetAudience("STUDENT");
+                  if (
+                    ![
+                      "internship",
+                      "job",
+                      "project",
+                      "apprenticeship",
+                    ].includes(type)
+                  ) {
+                    setType("internship");
+                  }
+                }}
+              >
+                <GraduationCap size={15} />
+                <span>Students</span>
+              </button>
+              <button
+                type="button"
+                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  targetAudience === "ACADEMICIAN"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                }`}
+                onClick={() => {
+                  setTargetAudience("ACADEMICIAN");
+                  if (
+                    ![
+                      "faculty_internship",
+                      "industrial_training",
+                      "fdp",
+                      "consultancy",
+                      "research_collaboration",
+                      "guest_lecture",
+                    ].includes(type)
+                  ) {
+                    setType("faculty_internship");
+                  }
+                }}
+              >
+                <Building2 size={15} />
+                <span>Academicians</span>
+              </button>
+              <button
+                type="button"
+                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  targetAudience === "BOTH"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                }`}
+                onClick={() => setTargetAudience("BOTH")}
+              >
+                <Sparkles size={15} />
+                <span>Both</span>
+              </button>
+            </div>
+          </div>
+
+          {/* TYPE SELECTOR */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
               Opportunity Type *
             </label>
-            <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-950/60 border border-slate-800 rounded-xl">
-              <button
-                type="button"
-                className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
-                  type === "internship"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-                }`}
-                onClick={() => setType("internship")}
-              >
-                <GraduationCap size={18} />
-                <span>Internship</span>
-              </button>
-              <button
-                type="button"
-                className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
-                  type === "job"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-                }`}
-                onClick={() => setType("job")}
-              >
-                <Briefcase size={18} />
-                <span>Full-Time Job</span>
-              </button>
-            </div>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as OpportunityType)}
+              className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 rounded-xl px-4 py-2.5 text-sm outline-none cursor-pointer"
+            >
+              {(targetAudience === "STUDENT" || targetAudience === "BOTH") && (
+                <optgroup label="Student Opportunities" className="bg-slate-900 text-slate-400">
+                  <option value="internship" className="bg-slate-900 text-slate-100 py-2">
+                    🎓 Student Internship
+                  </option>
+                  <option value="job" className="bg-slate-900 text-slate-100 py-2">
+                    💼 Full-Time Job
+                  </option>
+                  <option value="project" className="bg-slate-900 text-slate-100 py-2">
+                    💻 Industry Project
+                  </option>
+                  <option value="apprenticeship" className="bg-slate-900 text-slate-100 py-2">
+                    🛠️ Apprenticeship
+                  </option>
+                </optgroup>
+              )}
+
+              {(targetAudience === "ACADEMICIAN" || targetAudience === "BOTH") && (
+                <optgroup label="Academician & Faculty Opportunities" className="bg-slate-900 text-slate-400">
+                  <option value="faculty_internship" className="bg-slate-900 text-slate-100 py-2">
+                    👨‍🏫 Faculty Internship
+                  </option>
+                  <option value="industrial_training" className="bg-slate-900 text-slate-100 py-2">
+                    🏭 Industrial Training for Faculty
+                  </option>
+                  <option value="fdp" className="bg-slate-900 text-slate-100 py-2">
+                    📚 Faculty Development Program (FDP)
+                  </option>
+                  <option value="consultancy" className="bg-slate-900 text-slate-100 py-2">
+                    💡 Industry Consultancy Project
+                  </option>
+                  <option value="research_collaboration" className="bg-slate-900 text-slate-100 py-2">
+                    🔬 Joint Research Collaboration
+                  </option>
+                  <option value="guest_lecture" className="bg-slate-900 text-slate-100 py-2">
+                    🎙️ Guest Lecture / Keynote Session
+                  </option>
+                </optgroup>
+              )}
+            </select>
           </div>
 
           {/* TITLE */}

@@ -10,9 +10,8 @@ export const requiredSkillSchema = z.object({
 });
 
 export const createOpportunitySchema = z.object({
-  type: z.enum(["internship", "job"], {
-    message: "Type must be either internship or job",
-  }),
+  targetAudience: z.enum(["STUDENT", "ACADEMICIAN", "BOTH"]).default("STUDENT").optional(),
+  type: z.string().trim().min(1, "Opportunity type is required"),
   title: z.string().trim().min(2, "Title is required").max(255),
   description: z.string().trim().min(10, "Description must be at least 10 characters"),
   location: z.string().trim().nullable().optional(),

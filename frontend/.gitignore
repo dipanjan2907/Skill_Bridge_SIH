@@ -12,7 +12,8 @@ dist
 dist-ssr
 *.local
 .env
-
+*.zip
+BRAIN.md
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

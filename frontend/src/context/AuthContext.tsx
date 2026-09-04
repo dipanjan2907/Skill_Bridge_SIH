@@ -57,11 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [user]);
 
   const login = (newToken: string, newUser: User) => {
+    sessionStorage.clear();
     setToken(newToken);
     setUser(newUser);
   };
 
   const logout = () => {
+    sessionStorage.clear();
     setToken(null);
     setUser(null);
     localStorage.removeItem("skillbridge_token");

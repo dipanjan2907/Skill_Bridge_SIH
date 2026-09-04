@@ -9,6 +9,7 @@ export interface SkillDemandItem {
   opportunityCount: number;
   demandPercentage: number;
   demandLevel: string;
+  studentCount: number;
 }
 
 export interface SkillDemandResult {
@@ -21,7 +22,9 @@ export interface SkillDemandResult {
 export class SkillDemandService {
   /**
    * Calculates real-time skill demand across published and active opportunities in SkillBridge.
+   * Retrieves ALL skills from the skills table.
    * Demand Percentage = (Distinct opportunities requiring skill / Total active published opportunities) * 100
+   * Student Supply = Count of distinct students possessing the skill in student_skills
    */
   public static async calculateSkillDemand(): Promise<SkillDemandResult> {
     // 1. Get total number of published, active/non-expired opportunities
@@ -34,55 +37,56 @@ export class SkillDemandService {
 
     const totalOpportunities = Number(totalRows[0]?.totalOpportunities || 0);
 
-    // If no published active opportunities exist in DB
-    if (totalOpportunities === 0) {
-      return {
-        data: [],
-        meta: { totalOpportunities: 0 },
-      };
-    }
-
-    // 2. Aggregate count of distinct opportunities requiring each skill
+    // 2. Aggregate count of distinct opportunities requiring each skill AND student supply for ALL skills
     const [demandRows] = await pool.query<RowDataPacket[]>(
       `SELECT 
         s.id AS skillId,
         s.name AS skillName,
         COALESCE(s.category, 'Technical') AS category,
-        COUNT(DISTINCT os.opportunity_id) AS opportunityCount
+        COUNT(DISTINCT os.opportunity_id) AS opportunityCount,
+        COUNT(DISTINCT ss.student_id) AS studentCount
        FROM skills s
-       JOIN opportunity_skills os ON s.id = os.skill_id
-       JOIN opportunities o ON os.opportunity_id = o.id
-       WHERE o.status = 'published'
+       LEFT JOIN opportunity_skills os ON s.id = os.skill_id
+       LEFT JOIN opportunities o ON os.opportunity_id = o.id
+         AND o.status = 'published'
          AND (o.application_deadline IS NULL OR o.application_deadline >= CURDATE())
+       LEFT JOIN student_skills ss ON s.id = ss.skill_id
        GROUP BY s.id, s.name, s.category
-       ORDER BY opportunityCount DESC, s.name ASC`
+       ORDER BY opportunityCount DESC, studentCount DESC, s.name ASC`
     );
 
     // 3. Map into SkillDemandItem structure with deterministic demand percentage and level
-    const data: SkillDemandItem[] = demandRows.map((row) => {
-      const oppCount = Number(row.opportunityCount || 0);
-      const demandPercentage = Math.min(
-        100,
-        Math.round((oppCount / totalOpportunities) * 100)
-      );
-      const demandLevel = getDemandLevel(demandPercentage);
+    const data: SkillDemandItem[] = demandRows
+      .filter((row) => Number(row.opportunityCount || 0) > 0)
+      .map((row) => {
+        const oppCount = Number(row.opportunityCount || 0);
+        const studentCount = Number(row.studentCount || 0);
 
-      return {
-        skillId: Number(row.skillId),
-        skillName: String(row.skillName),
-        category: String(row.category || "Technical"),
-        opportunityCount: oppCount,
-        demandPercentage,
-        demandLevel,
-      };
-    });
+        const demandPercentage = totalOpportunities > 0
+          ? Math.min(100, Math.round((oppCount / totalOpportunities) * 100))
+          : 0;
+        const demandLevel = getDemandLevel(demandPercentage);
 
-    // 4. Sort descending by demandPercentage, then opportunityCount
+        return {
+          skillId: Number(row.skillId),
+          skillName: String(row.skillName),
+          category: String(row.category || "Technical"),
+          opportunityCount: oppCount,
+          demandPercentage,
+          demandLevel,
+          studentCount,
+        };
+      });
+
+    // 4. Sort descending by demandPercentage, then opportunityCount, then studentCount
     data.sort((a, b) => {
       if (b.demandPercentage !== a.demandPercentage) {
         return b.demandPercentage - a.demandPercentage;
       }
-      return b.opportunityCount - a.opportunityCount;
+      if (b.opportunityCount !== a.opportunityCount) {
+        return b.opportunityCount - a.opportunityCount;
+      }
+      return b.studentCount - a.studentCount;
     });
 
     return {

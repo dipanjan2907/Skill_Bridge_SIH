@@ -428,7 +428,7 @@ const LandingPage: React.FC = () => {
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         </div>
                         <span className="text-[10px] text-slate-400 font-medium">
-                          Skill DNA & Profile
+                          Skill Matrix & Profile
                         </span>
                       </div>
                     </div>
@@ -677,7 +677,7 @@ const LandingPage: React.FC = () => {
               {
                 step: "02",
                 title: "Build Skill Profile",
-                desc: "Generate a verified Skill DNA matrix and digital portfolio showcase.",
+                desc: "Generate a verified Skill Matrix and digital portfolio showcase.",
                 icon: Award,
                 color: "text-cyan-400",
                 bg: "bg-cyan-500/10 border-cyan-500/20",
@@ -1432,7 +1432,7 @@ const LandingPage: React.FC = () => {
                 Verified Hiring Partner
               </h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Verified companies access candidate Skill DNA profiles and post
+                Verified companies access candidate Skill Matrix profiles and post
                 pre-screened campus recruitment opportunities.
               </p>
             </div>

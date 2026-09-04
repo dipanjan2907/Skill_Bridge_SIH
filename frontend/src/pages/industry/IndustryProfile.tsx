@@ -170,9 +170,9 @@ const IndustryProfilePage: React.FC = () => {
               <div className="status-banner-content">
                 <div className="status-banner-header">
                   <h3>
-                    {status === "pending" && "🟡 Verification Pending"}
-                    {status === "approved" && "🟢 Verified Industry"}
-                    {status === "rejected" && "🔴 Verification Rejected"}
+                    {status === "pending" && "Verification Pending"}
+                    {status === "approved" && "Verified Industry"}
+                    {status === "rejected" && "Verification Rejected"}
                   </h3>
                   <span className={`status-pill status-pill-${status}`}>
                     {status.toUpperCase()}

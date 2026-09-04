@@ -41,7 +41,20 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   );
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfile = async (forceRefresh = false) => {
+      if (!forceRefresh) {
+        const cached = sessionStorage.getItem("sb_student_profile");
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.profile) {
+              setProfileData(parsed.profile);
+              return;
+            }
+          } catch (_e) {}
+        }
+      }
+
       const authToken = token || localStorage.getItem("skillbridge_token");
       if (!authToken) return;
 
@@ -57,6 +70,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           const result = await res.json();
           if (result && result.profile) {
             setProfileData(result.profile);
+            sessionStorage.setItem("sb_student_profile", JSON.stringify(result));
           }
         }
       } catch (err) {
@@ -66,11 +80,16 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 
     fetchProfile();
 
-    window.addEventListener("profileUpdated", fetchProfile);
-    return () => {
-      window.removeEventListener("profileUpdated", fetchProfile);
+    const handleProfileUpdate = () => {
+      sessionStorage.removeItem("sb_student_profile");
+      fetchProfile(true);
     };
-  }, [token, location.pathname]);
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, [token]);
 
   const handleLogout = () => {
     logout();
@@ -105,15 +124,47 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const isInstitutionActive = location.pathname === "/institution/dashboard";
   const isInstStudentsActive = location.pathname === "/institution/students";
   const isCollabActive = location.pathname === "/collaborations";
+  const isSavedActive = location.pathname === "/student/saved";
+  const isLearningActive = location.pathname === "/student/learning";
+  const isExperiencesActive =
+    location.pathname === "/student/experiences" || location.pathname === "/experiences";
 
-  // Calculate 2-letter initials from name
-  const getInitials = (name?: string) => {
-    if (!name) return "SB";
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  // Calculate 2-letter initials from name, stripping titles (Dr., Prof., Mr., etc.)
+  const getInitials = (name?: string): string => {
+    if (!name || !name.trim()) return "SB";
+    const titles = new Set([
+      "dr",
+      "dr.",
+      "mr",
+      "mr.",
+      "mrs",
+      "mrs.",
+      "ms",
+      "ms.",
+      "prof",
+      "prof.",
+      "er",
+      "er.",
+      "shri",
+      "smt",
+      "sir",
+      "madam",
+    ]);
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter((part) => !titles.has(part.toLowerCase()));
+
+    if (parts.length === 0) {
+      const raw = name.replace(/[^a-zA-Z]/g, "");
+      return raw.substring(0, 2).toUpperCase() || "SB";
     }
-    return name.substring(0, 2).toUpperCase();
+
+    if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
   // Dynamic values from database fetch
@@ -329,8 +380,19 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
               >
                 <SideItem
                   icon={<Users />}
-                  text="Enrolled Student Details & Skill DNA"
+                  text="Enrolled Student Details & Skills"
                   active={isInstStudentsActive}
+                />
+              </div>
+              <div
+                onClick={() => handleNavigation("/opportunities")}
+                style={{ cursor: "pointer" }}
+              >
+                <SideItem
+                  icon={<Briefcase />}
+                  text="Academician Opportunities"
+                  active={isStudentOppActive}
+                  badge="Industry"
                 />
               </div>
               <div
@@ -377,20 +439,25 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                 />
               </div>
               <div
-                onClick={() =>
-                  handleNavigation("/coming-soon?feature=Learning%20Path")
-                }
+                onClick={() => handleNavigation("/student/learning")}
                 style={{ cursor: "pointer" }}
               >
-                <SideItem icon={<BookOpen />} text="Learning Path" />
+                <SideItem
+                  icon={<BookOpen />}
+                  text="Learning Path"
+                  active={isLearningActive}
+                  badge="BETA"
+                />
               </div>
               <div
-                onClick={() =>
-                  handleNavigation("/coming-soon?feature=Experiences")
-                }
+                onClick={() => handleNavigation("/student/experiences")}
                 style={{ cursor: "pointer" }}
               >
-                <SideItem icon={<Briefcase />} text="Experiences" badge="New" />
+                <SideItem
+                  icon={<Briefcase />}
+                  text="Experiences"
+                  active={isExperiencesActive}
+                />
               </div>
               <div
                 onClick={() => handleNavigation("/student/applications")}
@@ -403,12 +470,10 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                 />
               </div>
               <div
-                onClick={() =>
-                  handleNavigation("/coming-soon?feature=Saved%20Opportunities")
-                }
+                onClick={() => handleNavigation("/student/saved")}
                 style={{ cursor: "pointer" }}
               >
-                <SideItem icon={<Bookmark />} text="Saved" />
+                <SideItem icon={<Bookmark />} text="Saved" active={isSavedActive} />
               </div>
               <div
                 onClick={() =>

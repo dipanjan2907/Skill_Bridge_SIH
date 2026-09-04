@@ -299,7 +299,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     </div>
                     <div>
                       <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                        Skill DNA Match Analysis
+                        Skill Match Analysis
                       </h3>
                       <p className="text-[11px] text-slate-400">
                         Calculated dynamically from your verified skill benchmarks

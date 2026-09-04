@@ -1,4 +1,18 @@
-export type OpportunityType = "internship" | "job";
+export type TargetAudience = "STUDENT" | "ACADEMICIAN" | "BOTH";
+
+export type OpportunityType =
+  | "internship"
+  | "job"
+  | "project"
+  | "apprenticeship"
+  | "faculty_internship"
+  | "industrial_training"
+  | "fdp"
+  | "consultancy"
+  | "research_collaboration"
+  | "guest_lecture"
+  | string;
+
 export type OpportunityStatus = "draft" | "published" | "closed";
 
 export interface OpportunitySkill {
@@ -14,6 +28,7 @@ export interface Opportunity {
   id: number;
   industry_id: number;
   type: OpportunityType;
+  target_audience?: TargetAudience;
   title: string;
   description: string;
   location: string | null;
@@ -35,6 +50,7 @@ export interface Opportunity {
 
 export interface CreateOpportunityPayload {
   type: OpportunityType;
+  targetAudience?: TargetAudience;
   title: string;
   description: string;
   location?: string;

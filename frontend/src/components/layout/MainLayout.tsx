@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import CareerMatch from "../dashboard/CareerMatch";
 import Opportunities from "../dashboard/Opportunities";
 import AIChat from "../dashboard/AIChat";
+import { useAuth } from "../../context/AuthContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -12,6 +13,10 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, showRightPanel = true }: MainLayoutProps) => {
+  const { user } = useAuth();
+  const role = user?.role ? String(user.role).toLowerCase() : "student";
+  const isStudent = role === "student";
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
 
@@ -39,7 +44,7 @@ const MainLayout = ({ children, showRightPanel = true }: MainLayoutProps) => {
           <aside className={`right-panel ${isRightPanelOpen ? "open" : ""}`}>
             <div className="right-panel-header-mobile">
               <div className="mobile-title">
-                <h3>Career Match & Assistant</h3>
+                <h3>{isStudent ? "Career Match & Assistant" : "SkillBridge AI Assistant"}</h3>
               </div>
               <button
                 className="icon-button"
@@ -51,7 +56,7 @@ const MainLayout = ({ children, showRightPanel = true }: MainLayoutProps) => {
             </div>
 
             <div className="right-panel-content custom-scrollbar">
-              <CareerMatch />
+              {isStudent && <CareerMatch />}
               <Opportunities />
               <AIChat />
             </div>
