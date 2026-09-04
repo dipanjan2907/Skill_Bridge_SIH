@@ -30,6 +30,8 @@ import {
 
 import { API_BASE_URL } from "../../config/api";
 
+import AdminAssessmentModeration from "../../components/admin/AdminAssessmentModeration";
+
 // Interfaces for Student and Faculty admin views
 interface AdminStudentItem {
   user_id: number;
@@ -126,7 +128,7 @@ const AdminDashboard: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"verifications" | "institutions" | "industries" | "faculty">("verifications");
+  const [activeTab, setActiveTab] = useState<"verifications" | "institutions" | "industries" | "faculty" | "assessments">("verifications");
 
   // Filter & Search states
   const [statusFilter, setStatusFilter] = useState<string>("pending");
@@ -678,14 +680,16 @@ const AdminDashboard: React.FC = () => {
   const getHeaderTitle = () => {
     switch (activeTab) {
       case "institutions":
-        return "🏫 Institutions & Colleges Directory";
+        return "Institutions & Colleges Directory";
       case "industries":
-        return "🏢 Industry Partners Directory";
+        return "Industry Partners Directory";
       case "faculty":
-        return "👨‍🏫 Faculty & Academician Directory";
+        return "Faculty & Academician Directory";
+      case "assessments":
+        return "Shared Assessment Question Bank Moderation";
       case "verifications":
       default:
-        return "🛡️ Industry Approvals & Verification Governance";
+        return "Industry Approvals & Verification Governance";
     }
   };
 
@@ -697,6 +701,8 @@ const AdminDashboard: React.FC = () => {
         return "View and search all registered industry partners with complete profile control.";
       case "faculty":
         return "Manage registered academicians, teachers, and account privileges.";
+      case "assessments":
+        return "Review and moderate industry & faculty submitted questions before adding them to student assessment pools.";
       case "verifications":
       default:
         return "Review, verify, or revoke company verification status for platform governance.";
@@ -788,8 +794,18 @@ const AdminDashboard: React.FC = () => {
               <Users size={14} />
               <span>Faculty Directory</span>
             </button>
+
+            <button
+              className={`tab-btn ${activeTab === "assessments" ? "active" : ""}`}
+              onClick={() => setActiveTab("assessments")}
+            >
+              <ShieldAlert size={14} />
+              <span>Question Moderation</span>
+            </button>
           </div>
         </div>
+
+        {activeTab === "assessments" && <AdminAssessmentModeration />}
 
         {/* Tab Specific Controls */}
         {activeTab === "verifications" && (

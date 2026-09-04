@@ -144,26 +144,26 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
     if (score >= 80) {
       return (
-        <span className="px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-full">
-          🎯 {score}% Match • {category}
+        <span className="px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-full inline-flex items-center gap-1">
+          <Target size={13} /> {score}% Match • {category}
         </span>
       );
     } else if (score >= 65) {
       return (
-        <span className="px-3 py-1 bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs rounded-full">
-          🎯 {score}% Match • {category}
+        <span className="px-3 py-1 bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs rounded-full inline-flex items-center gap-1">
+          <Target size={13} /> {score}% Match • {category}
         </span>
       );
     } else if (score >= 50) {
       return (
-        <span className="px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-full">
-          🎯 {score}% Match • {category}
+        <span className="px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-full inline-flex items-center gap-1">
+          <Target size={13} /> {score}% Match • {category}
         </span>
       );
     } else {
       return (
-        <span className="px-3 py-1 bg-rose-500/15 border border-rose-500/30 text-rose-400 font-bold text-xs rounded-full">
-          🎯 {score}% Match • {category}
+        <span className="px-3 py-1 bg-rose-500/15 border border-rose-500/30 text-rose-400 font-bold text-xs rounded-full inline-flex items-center gap-1">
+          <Target size={13} /> {score}% Match • {category}
         </span>
       );
     }
