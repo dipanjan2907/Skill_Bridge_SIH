@@ -36,7 +36,8 @@ const corsOptions = {
             normalizedOrigin.endsWith(".vercel.app") ||
             normalizedOrigin.includes("vercel.app") ||
             allowedOrigins.some((o) => o.replace(/\/$/, "") === normalizedOrigin) ||
-            (process.env.FRONTEND_URL && normalizedOrigin === process.env.FRONTEND_URL.replace(/\/$/, ""))) {
+            (process.env.FRONTEND_URL &&
+                normalizedOrigin === process.env.FRONTEND_URL.replace(/\/$/, ""))) {
             return callback(null, true);
         }
         // Fallback: allow origin to avoid breaking preflights
@@ -44,7 +45,12 @@ const corsOptions = {
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+    ],
     optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -71,7 +77,9 @@ app.get("/api/health", (_req, res) => {
 });
 // Fallback 404 handler for unmatched routes
 app.use((_req, res) => {
-    res.status(404).json({ error: "Endpoint not found on SkillBridge API server" });
+    res
+        .status(404)
+        .json({ error: "Endpoint not found on SkillBridge API server" });
 });
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

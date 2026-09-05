@@ -16,6 +16,9 @@ router.post("/assessments/submit", authenticateToken, submitAssessment);
 router.get("/assessment/questions/my", authenticateToken, getMyQuestions);
 router.post("/assessment/questions", authenticateToken, createContributorQuestion);
 router.post("/assessment/questions/bulk-import", authenticateToken, bulkImportContributorQuestions);
+// Compatibility endpoint for clients built before the contributor route was
+// consolidated under /assessment/questions.
+router.post("/assessments/questions-bulk-import", authenticateToken, bulkImportContributorQuestions);
 router.put("/assessment/questions/:id", authenticateToken, updateContributorQuestion);
 router.delete("/assessment/questions/:id", authenticateToken, deleteContributorQuestion);
 router.post("/assessment/skills/request", authenticateToken, requestNewSkill);

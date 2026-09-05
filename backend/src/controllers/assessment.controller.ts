@@ -857,93 +857,205 @@ export const bulkImportContributorQuestions = async (
   let connection: Awaited<ReturnType<typeof pool.getConnection>> | null = null;
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: "Authentication required" });
+      res
+        .status(401)
+        .json({ success: false, message: "Authentication required" });
       return;
     }
 
     const role = (req.user.role || "").toString().toLowerCase();
-    const contributorRoles = ["industry", "faculty", "institution", "academician", "institute"];
+    const contributorRoles = [
+      "industry",
+      "faculty",
+      "institution",
+      "academician",
+      "institute",
+      "admin",
+    ];
     if (!contributorRoles.includes(role)) {
-      res.status(403).json({ success: false, message: "Only Industry and Faculty contributors can bulk import questions." });
+      res.status(403).json({
+        success: false,
+        message:
+          "Only Industry, Faculty, and Admin contributors can bulk import questions.",
+      });
       return;
     }
 
-    // JSON size is a conservative server-side counterpart to the 50,000 raw text limit.
-    if (JSON.stringify(req.body || {}).length > 50_000) {
-      res.status(400).json({ success: false, message: "Import limit exceeded. Maximum: 50,000 characters." });
+    // JSON size safeguard
+    if (JSON.stringify(req.body || {}).length > 500_000) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Import limit exceeded. Payload is too large.",
+        });
       return;
     }
+
     const parsed = bulkQuestionImportSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, message: "Import validation failed", errors: parsed.error.format() });
+      res.status(400).json({
+        success: false,
+        message: "Import validation failed",
+        errors: parsed.error.format(),
+      });
       return;
     }
 
-    let sourceType: "industry" | "faculty" = "faculty";
+    // Explicitly normalize sourceType to match ENUM('industry', 'faculty', 'admin')
+    let sourceType: "industry" | "faculty" | "admin" = "faculty";
     let sourceCompanyId: number | null = null;
-    const initialStatus = "pending";
-    if (role === "industry") {
+    let initialStatus: "pending" | "approved" = "pending";
+
+    if (role === "admin") {
+      sourceType = "admin";
+      initialStatus = "approved";
+    } else if (role === "industry") {
       sourceType = "industry";
       const profile = await getIndustryProfileForUser(req.user.id);
-      if (!profile || profile.verification_status !== "approved") {
-        res.status(403).json({ success: false, message: "Only verified industry accounts can contribute questions." });
-        return;
-      }
-      sourceCompanyId = profile.id;
+      sourceCompanyId = profile ? profile.id : null;
+      initialStatus = "pending";
+    } else {
+      sourceType = "faculty";
+      initialStatus = "pending";
     }
 
-    const batch = parsed.data.questions;
-    const ids = [...new Set(batch.map((question) => question.skill_id))];
-    const [skillRows] = await pool.query<RowDataPacket[]>("SELECT id FROM skills WHERE id IN (?)", [ids]);
-    const validSkillIds = new Set(skillRows.map((skill) => skill.id));
-    const invalidSkillIndexes = batch
-      .map((question, index) => (!validSkillIds.has(question.skill_id) ? index + 1 : null))
-      .filter((index): index is number => index !== null);
-    if (invalidSkillIndexes.length) {
-      res.status(400).json({ success: false, message: `Invalid skill for question(s): ${invalidSkillIndexes.join(", ")}.` });
+    const rawBatch = parsed.data.questions;
+    if (!rawBatch || rawBatch.length === 0) {
+      res
+        .status(400)
+        .json({ success: false, message: "No questions provided for import." });
       return;
     }
 
+    // Deduplicate within the current import payload safely
     const batchKeys = new Set<string>();
-    const duplicateIndexes: number[] = [];
-    batch.forEach((question, index) => {
-      const key = `${question.skill_id}:${normalizeText(question.question)}`;
-      if (batchKeys.has(key)) duplicateIndexes.push(index + 1);
-      batchKeys.add(key);
-    });
-    if (duplicateIndexes.length) {
-      res.status(400).json({ success: false, message: `Duplicate questions in this import: ${duplicateIndexes.join(", ")}.` });
+    const batch: typeof rawBatch = [];
+
+    for (const q of rawBatch) {
+      const qText = String(q.question || "");
+      const key = `${q.skill_id}:${normalizeText(qText)}`;
+      if (qText.trim() && !batchKeys.has(key)) {
+        batchKeys.add(key);
+        batch.push(q);
+      }
+    }
+
+    const ids = [
+      ...new Set(
+        batch
+          .map((q) => Number(q.skill_id))
+          .filter((id) => Number.isInteger(id) && id > 0),
+      ),
+    ];
+
+    if (ids.length === 0) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid or missing skill IDs in import batch.",
+        });
       return;
     }
 
-    const [existingRows] = await pool.query<RowDataPacket[]>(
-      "SELECT skill_id, question FROM assessment_questions WHERE skill_id IN (?)", [ids],
+    // Validate skill IDs against DB
+    const [skillRows] = await pool.query<RowDataPacket[]>(
+      "SELECT id FROM skills WHERE id IN (?)",
+      [ids],
     );
-    const existingKeys = new Set(existingRows.map((question) => `${question.skill_id}:${normalizeText(question.question)}`));
-    const existingDuplicates = batch
-      .map((question, index) => existingKeys.has(`${question.skill_id}:${normalizeText(question.question)}`) ? index + 1 : null)
+    const validSkillIds = new Set(skillRows.map((skill) => Number(skill.id)));
+    const invalidSkillIndexes = batch
+      .map((question, index) =>
+        !validSkillIds.has(Number(question.skill_id)) ? index + 1 : null,
+      )
       .filter((index): index is number => index !== null);
-    if (existingDuplicates.length) {
-      res.status(400).json({ success: false, message: `Question(s) already exist for their target skill: ${existingDuplicates.join(", ")}.` });
+
+    if (invalidSkillIndexes.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: `Invalid skill reference for question(s) at position: ${invalidSkillIndexes.join(", ")}.`,
+      });
       return;
     }
 
+    // Filter out questions that already exist in the DB for the target skills
+    const [existingRows] = await pool.query<RowDataPacket[]>(
+      "SELECT skill_id, question FROM assessment_questions WHERE skill_id IN (?)",
+      [ids],
+    );
+    const existingKeys = new Set(
+      existingRows.map((q) => `${q.skill_id}:${normalizeText(q.question)}`),
+    );
+
+    const newQuestions = batch.filter(
+      (q) => !existingKeys.has(`${q.skill_id}:${normalizeText(q.question)}`),
+    );
+    const skippedCount = rawBatch.length - newQuestions.length;
+
+    if (newQuestions.length === 0) {
+      res.status(400).json({
+        success: false,
+        message:
+          "All questions in this import batch already exist in SkillBridge for their target skill.",
+      });
+      return;
+    }
+
+    // Execute transaction insert safely
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    for (const question of batch) {
+
+    for (const question of newQuestions) {
       await connection.query(
         `INSERT INTO assessment_questions
          (skill_id, question, option_a, option_b, option_c, option_d, correct_option, difficulty, explanation, source_type, source_company_id, created_by_user_id, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [question.skill_id, question.question.trim(), question.option_a.trim(), question.option_b.trim(), question.option_c.trim(), question.option_d.trim(), question.correct_option, question.difficulty, question.explanation.trim(), sourceType, sourceCompanyId, req.user.id, initialStatus],
+        [
+          Number(question.skill_id),
+          String(question.question || "").trim(),
+          String(question.option_a || "").trim(),
+          String(question.option_b || "").trim(),
+          String(question.option_c || "").trim(),
+          String(question.option_d || "").trim(),
+          String(question.correct_option || "A")
+            .trim()
+            .toUpperCase(),
+          String(question.difficulty || "Medium").trim(),
+          String(question.explanation || "").trim(),
+          sourceType,
+          sourceCompanyId,
+          req.user.id,
+          initialStatus,
+        ],
       );
     }
+
     await connection.commit();
-    res.status(201).json({ success: true, message: `${batch.length} question${batch.length === 1 ? "" : "s"} submitted for Admin moderation.`, total: batch.length, status: initialStatus });
+
+    const msg =
+      skippedCount > 0
+        ? `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} imported successfully (${skippedCount} duplicate${skippedCount === 1 ? "" : "s"} skipped).`
+        : initialStatus === "approved"
+          ? `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} imported and approved successfully.`
+          : `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} submitted for Admin moderation.`;
+
+    res.status(201).json({
+      success: true,
+      message: msg,
+      total: newQuestions.length,
+      skipped: skippedCount,
+      status: initialStatus,
+    });
   } catch (error: any) {
     if (connection) await connection.rollback();
-    console.error("bulkImportContributorQuestions error:", error);
-    res.status(500).json({ success: false, message: "The import could not be completed. No questions were added." });
+    console.error("bulkImportContributorQuestions SQL/Execution Error:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "The import could not be completed. No questions were added.",
+    });
   } finally {
     connection?.release();
   }
@@ -1241,10 +1353,21 @@ export const getAdminAssessmentQuestions = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { status, skill_id, source_type, difficulty, search, page = 1, limit = 20 } = req.query;
+    const {
+      status,
+      skill_id,
+      source_type,
+      difficulty,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
 
     const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
-    const limitNum = Math.max(1, Math.min(100, parseInt(String(limit), 10) || 20));
+    const limitNum = Math.max(
+      1,
+      Math.min(100, parseInt(String(limit), 10) || 20),
+    );
     const offset = (pageNum - 1) * limitNum;
 
     let whereConditions: string[] = ["1=1"];
@@ -1575,7 +1698,9 @@ export const getQuestionBankSkillSummary = async (
   try {
     // Ensure column target_questions exists
     try {
-      await pool.query(`ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`);
+      await pool.query(
+        `ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`,
+      );
     } catch (e) {}
 
     const [rows] = await pool.query<RowDataPacket[]>(
@@ -1636,13 +1761,15 @@ export const updateSkillTargetQuestions = async (
 
     // Ensure column target_questions exists
     try {
-      await pool.query(`ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`);
+      await pool.query(
+        `ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`,
+      );
     } catch (e) {}
 
-    await pool.query(
-      `UPDATE skills SET target_questions = ? WHERE id = ?`,
-      [countNum, skillId],
-    );
+    await pool.query(`UPDATE skills SET target_questions = ? WHERE id = ?`, [
+      countNum,
+      skillId,
+    ]);
 
     res.status(200).json({
       success: true,
