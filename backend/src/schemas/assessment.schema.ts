@@ -14,6 +14,13 @@ export const createQuestionSchema = z.object({
 
 export const updateQuestionSchema = createQuestionSchema.partial();
 
+// The import endpoint deliberately accepts the same fields as a manual question.
+// Keeping this schema separate only adds the batch boundary and lets the controller
+// validate the whole import before opening a transaction.
+export const bulkQuestionImportSchema = z.object({
+  questions: z.array(createQuestionSchema).min(1, "At least one question is required").max(100, "A maximum of 100 questions can be imported at once"),
+});
+
 export const rejectQuestionSchema = z.object({
   rejection_reason: z.string().min(3, "Rejection reason must be at least 3 characters"),
 });

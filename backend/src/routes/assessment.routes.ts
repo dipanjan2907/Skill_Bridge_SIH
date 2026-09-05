@@ -7,6 +7,7 @@ import {
   submitAssessment,
   getMyQuestions,
   createContributorQuestion,
+  bulkImportContributorQuestions,
   updateContributorQuestion,
   deleteContributorQuestion,
   requestNewSkill,
@@ -36,6 +37,7 @@ router.post("/assessments/submit", authenticateToken, submitAssessment);
 // ==========================================
 router.get("/assessment/questions/my", authenticateToken, getMyQuestions);
 router.post("/assessment/questions", authenticateToken, createContributorQuestion);
+router.post("/assessment/questions/bulk-import", authenticateToken, bulkImportContributorQuestions);
 router.put("/assessment/questions/:id", authenticateToken, updateContributorQuestion);
 router.delete("/assessment/questions/:id", authenticateToken, deleteContributorQuestion);
 

@@ -236,8 +236,107 @@ export const initTables = async () => {
         correct_option ENUM('A', 'B', 'C', 'D') NOT NULL,
         difficulty VARCHAR(20) NOT NULL DEFAULT 'Medium',
         explanation TEXT,
+        source_type VARCHAR(50) NOT NULL DEFAULT 'system',
+        source_company_id INT NULL,
+        created_by_user_id INT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'approved',
+        rejection_reason TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_assessment_questions_skill_id (skill_id),
+        INDEX idx_assessment_questions_status (status),
+        INDEX idx_assessment_questions_source (source_type),
+        INDEX idx_assessment_questions_company (source_company_id),
         FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+      )
+    `);
+        // Safe non-destructive additive migrations for assessment_questions
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN source_type VARCHAR(50) NOT NULL DEFAULT 'system'`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN source_company_id INT NULL`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN created_by_user_id INT NULL`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'approved'`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN rejection_reason TEXT NULL`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD INDEX idx_assessment_questions_status (status)`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD INDEX idx_assessment_questions_source (source_type)`);
+        }
+        catch (_e) { }
+        try {
+            await pool.query(`ALTER TABLE assessment_questions ADD INDEX idx_assessment_questions_company (source_company_id)`);
+        }
+        catch (_e) { }
+        // 8b. Assessment Attempts Table
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS assessment_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        skill_id INT NOT NULL,
+        score INT DEFAULT 0,
+        proficiency_score INT DEFAULT 0,
+        total_questions INT DEFAULT 0,
+        correct_count INT DEFAULT 0,
+        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP NULL,
+        INDEX idx_att_student (student_id),
+        INDEX idx_att_skill (skill_id),
+        FOREIGN KEY (student_id) REFERENCES student_profiles(id) ON DELETE CASCADE,
+        FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+      )
+    `);
+        // 8c. Assessment Attempt Questions Table
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS assessment_attempt_questions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        attempt_id INT NOT NULL,
+        question_id INT NOT NULL,
+        selected_option VARCHAR(10) NULL,
+        is_correct BOOLEAN DEFAULT FALSE,
+        INDEX idx_att_q_attempt (attempt_id),
+        INDEX idx_att_q_question (question_id),
+        FOREIGN KEY (attempt_id) REFERENCES assessment_attempts(id) ON DELETE CASCADE,
+        FOREIGN KEY (question_id) REFERENCES assessment_questions(id) ON DELETE CASCADE
+      )
+    `);
+        // 8d. Skill Requests Table
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS skill_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        requested_by INT NOT NULL,
+        skill_name VARCHAR(100) NOT NULL,
+        category VARCHAR(100) DEFAULT 'Technical',
+        reason TEXT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        rejection_reason TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_skill_req_user (requested_by),
+        INDEX idx_skill_req_status (status),
+        FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
         // 9. Industry Profiles Table
