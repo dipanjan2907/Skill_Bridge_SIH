@@ -3,6 +3,7 @@ import pool from "../config/db.js";
 import type { RowDataPacket, ResultSetHeader } from "mysql2";
 import {
   createQuestionSchema,
+  bulkQuestionImportSchema,
   updateQuestionSchema,
   rejectQuestionSchema,
   createSkillRequestSchema,
@@ -845,6 +846,222 @@ export const createContributorQuestion = async (
 };
 
 /**
+ * POST /api/assessment/questions/bulk-import
+ * Finalizes a client-reviewed batch. Parsing intentionally happens in the client,
+ * but every item is revalidated here and inserted in one transaction.
+ */
+export const bulkImportContributorQuestions = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  let connection: Awaited<ReturnType<typeof pool.getConnection>> | null = null;
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, message: "Authentication required" });
+      return;
+    }
+
+    const role = (req.user.role || "").toString().toLowerCase();
+    const contributorRoles = [
+      "industry",
+      "faculty",
+      "institution",
+      "academician",
+      "institute",
+      "admin",
+    ];
+    if (!contributorRoles.includes(role)) {
+      res.status(403).json({
+        success: false,
+        message:
+          "Only Industry, Faculty, and Admin contributors can bulk import questions.",
+      });
+      return;
+    }
+
+    // JSON size safeguard
+    if (JSON.stringify(req.body || {}).length > 500_000) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Import limit exceeded. Payload is too large.",
+        });
+      return;
+    }
+
+    const parsed = bulkQuestionImportSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        success: false,
+        message: "Import validation failed",
+        errors: parsed.error.format(),
+      });
+      return;
+    }
+
+    // Explicitly normalize sourceType to match ENUM('industry', 'faculty', 'admin')
+    let sourceType: "industry" | "faculty" | "admin" = "faculty";
+    let sourceCompanyId: number | null = null;
+    let initialStatus: "pending" | "approved" = "pending";
+
+    if (role === "admin") {
+      sourceType = "admin";
+      initialStatus = "approved";
+    } else if (role === "industry") {
+      sourceType = "industry";
+      const profile = await getIndustryProfileForUser(req.user.id);
+      sourceCompanyId = profile ? profile.id : null;
+      initialStatus = "pending";
+    } else {
+      sourceType = "faculty";
+      initialStatus = "pending";
+    }
+
+    const rawBatch = parsed.data.questions;
+    if (!rawBatch || rawBatch.length === 0) {
+      res
+        .status(400)
+        .json({ success: false, message: "No questions provided for import." });
+      return;
+    }
+
+    // Deduplicate within the current import payload safely
+    const batchKeys = new Set<string>();
+    const batch: typeof rawBatch = [];
+
+    for (const q of rawBatch) {
+      const qText = String(q.question || "");
+      const key = `${q.skill_id}:${normalizeText(qText)}`;
+      if (qText.trim() && !batchKeys.has(key)) {
+        batchKeys.add(key);
+        batch.push(q);
+      }
+    }
+
+    const ids = [
+      ...new Set(
+        batch
+          .map((q) => Number(q.skill_id))
+          .filter((id) => Number.isInteger(id) && id > 0),
+      ),
+    ];
+
+    if (ids.length === 0) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid or missing skill IDs in import batch.",
+        });
+      return;
+    }
+
+    // Validate skill IDs against DB
+    const [skillRows] = await pool.query<RowDataPacket[]>(
+      "SELECT id FROM skills WHERE id IN (?)",
+      [ids],
+    );
+    const validSkillIds = new Set(skillRows.map((skill) => Number(skill.id)));
+    const invalidSkillIndexes = batch
+      .map((question, index) =>
+        !validSkillIds.has(Number(question.skill_id)) ? index + 1 : null,
+      )
+      .filter((index): index is number => index !== null);
+
+    if (invalidSkillIndexes.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: `Invalid skill reference for question(s) at position: ${invalidSkillIndexes.join(", ")}.`,
+      });
+      return;
+    }
+
+    // Filter out questions that already exist in the DB for the target skills
+    const [existingRows] = await pool.query<RowDataPacket[]>(
+      "SELECT skill_id, question FROM assessment_questions WHERE skill_id IN (?)",
+      [ids],
+    );
+    const existingKeys = new Set(
+      existingRows.map((q) => `${q.skill_id}:${normalizeText(q.question)}`),
+    );
+
+    const newQuestions = batch.filter(
+      (q) => !existingKeys.has(`${q.skill_id}:${normalizeText(q.question)}`),
+    );
+    const skippedCount = rawBatch.length - newQuestions.length;
+
+    if (newQuestions.length === 0) {
+      res.status(400).json({
+        success: false,
+        message:
+          "All questions in this import batch already exist in SkillBridge for their target skill.",
+      });
+      return;
+    }
+
+    // Execute transaction insert safely
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    for (const question of newQuestions) {
+      await connection.query(
+        `INSERT INTO assessment_questions
+         (skill_id, question, option_a, option_b, option_c, option_d, correct_option, difficulty, explanation, source_type, source_company_id, created_by_user_id, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          Number(question.skill_id),
+          String(question.question || "").trim(),
+          String(question.option_a || "").trim(),
+          String(question.option_b || "").trim(),
+          String(question.option_c || "").trim(),
+          String(question.option_d || "").trim(),
+          String(question.correct_option || "A")
+            .trim()
+            .toUpperCase(),
+          String(question.difficulty || "Medium").trim(),
+          String(question.explanation || "").trim(),
+          sourceType,
+          sourceCompanyId,
+          req.user.id,
+          initialStatus,
+        ],
+      );
+    }
+
+    await connection.commit();
+
+    const msg =
+      skippedCount > 0
+        ? `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} imported successfully (${skippedCount} duplicate${skippedCount === 1 ? "" : "s"} skipped).`
+        : initialStatus === "approved"
+          ? `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} imported and approved successfully.`
+          : `${newQuestions.length} question${newQuestions.length === 1 ? "" : "s"} submitted for Admin moderation.`;
+
+    res.status(201).json({
+      success: true,
+      message: msg,
+      total: newQuestions.length,
+      skipped: skippedCount,
+      status: initialStatus,
+    });
+  } catch (error: any) {
+    if (connection) await connection.rollback();
+    console.error("bulkImportContributorQuestions SQL/Execution Error:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "The import could not be completed. No questions were added.",
+    });
+  } finally {
+    connection?.release();
+  }
+};
+
+/**
  * PUT /api/assessment/questions/:id
  * Edit a question submitted by contributor.
  */
@@ -1136,10 +1353,21 @@ export const getAdminAssessmentQuestions = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { status, skill_id, source_type, difficulty, search, page = 1, limit = 20 } = req.query;
+    const {
+      status,
+      skill_id,
+      source_type,
+      difficulty,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
 
     const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
-    const limitNum = Math.max(1, Math.min(100, parseInt(String(limit), 10) || 20));
+    const limitNum = Math.max(
+      1,
+      Math.min(100, parseInt(String(limit), 10) || 20),
+    );
     const offset = (pageNum - 1) * limitNum;
 
     let whereConditions: string[] = ["1=1"];
@@ -1470,7 +1698,9 @@ export const getQuestionBankSkillSummary = async (
   try {
     // Ensure column target_questions exists
     try {
-      await pool.query(`ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`);
+      await pool.query(
+        `ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`,
+      );
     } catch (e) {}
 
     const [rows] = await pool.query<RowDataPacket[]>(
@@ -1531,13 +1761,15 @@ export const updateSkillTargetQuestions = async (
 
     // Ensure column target_questions exists
     try {
-      await pool.query(`ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`);
+      await pool.query(
+        `ALTER TABLE skills ADD COLUMN target_questions INT NOT NULL DEFAULT 10`,
+      );
     } catch (e) {}
 
-    await pool.query(
-      `UPDATE skills SET target_questions = ? WHERE id = ?`,
-      [countNum, skillId],
-    );
+    await pool.query(`UPDATE skills SET target_questions = ? WHERE id = ?`, [
+      countNum,
+      skillId,
+    ]);
 
     res.status(200).json({
       success: true,

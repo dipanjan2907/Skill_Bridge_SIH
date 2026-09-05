@@ -7,6 +7,7 @@ import {
   submitAssessment,
   getMyQuestions,
   createContributorQuestion,
+  bulkImportContributorQuestions,
   updateContributorQuestion,
   deleteContributorQuestion,
   requestNewSkill,
@@ -20,7 +21,8 @@ import {
   approveSkillRequest,
   rejectSkillRequest,
 } from "../controllers/assessment.controller.js";
-
+console.log("🚨🚨🚨 LOADED ASSESSMENT ROUTES FILE 🚨🚨🚨");
+console.log("📍 FILE:", import.meta.url);
 const router = Router();
 
 // ==========================================
@@ -35,26 +37,106 @@ router.post("/assessments/submit", authenticateToken, submitAssessment);
 // CONTRIBUTOR (INDUSTRY / FACULTY) ENDPOINTS
 // ==========================================
 router.get("/assessment/questions/my", authenticateToken, getMyQuestions);
-router.post("/assessment/questions", authenticateToken, createContributorQuestion);
-router.put("/assessment/questions/:id", authenticateToken, updateContributorQuestion);
-router.delete("/assessment/questions/:id", authenticateToken, deleteContributorQuestion);
+router.post(
+  "/assessment/questions",
+  authenticateToken,
+  createContributorQuestion,
+);
+router.post(
+  "/assessment/questions/bulkimport",
+  authenticateToken,
+  bulkImportContributorQuestions,
+);
+router.put(
+  "/assessment/questions/:id",
+  authenticateToken,
+  updateContributorQuestion,
+);
+router.delete(
+  "/assessment/questions/:id",
+  authenticateToken,
+  deleteContributorQuestion,
+);
 
 router.post("/assessment/skills/request", authenticateToken, requestNewSkill);
-router.get("/assessment/stats/industry", authenticateToken, getIndustryQuestionAnalytics);
+router.get(
+  "/assessment/stats/industry",
+  authenticateToken,
+  getIndustryQuestionAnalytics,
+);
 
 // ==========================================
 // ADMIN MODERATION ENDPOINTS
 // ==========================================
-router.get("/admin/assessment/questions/skill-summary", authenticateToken, requireAdmin, getQuestionBankSkillSummary);
-router.put("/admin/assessment/skills/:id/target-questions", authenticateToken, requireAdmin, updateSkillTargetQuestions);
-router.get("/admin/assessment/questions", authenticateToken, requireAdmin, getAdminAssessmentQuestions);
-router.put("/admin/assessment/questions/:id/approve", authenticateToken, requireAdmin, approveQuestion);
-router.put("/admin/assessment/questions/:id/reject", authenticateToken, requireAdmin, rejectQuestion);
-router.put("/admin/assessment/questions/:id", authenticateToken, requireAdmin, updateContributorQuestion);
-router.delete("/admin/assessment/questions/:id", authenticateToken, requireAdmin, deleteContributorQuestion);
+router.get(
+  "/admin/assessment/questions/skill-summary",
+  authenticateToken,
+  requireAdmin,
+  getQuestionBankSkillSummary,
+);
+router.put(
+  "/admin/assessment/skills/:id/target-questions",
+  authenticateToken,
+  requireAdmin,
+  updateSkillTargetQuestions,
+);
+router.get(
+  "/admin/assessment/questions",
+  authenticateToken,
+  requireAdmin,
+  getAdminAssessmentQuestions,
+);
+router.put(
+  "/admin/assessment/questions/:id/approve",
+  authenticateToken,
+  requireAdmin,
+  approveQuestion,
+);
+router.put(
+  "/admin/assessment/questions/:id/reject",
+  authenticateToken,
+  requireAdmin,
+  rejectQuestion,
+);
+router.put(
+  "/admin/assessment/questions/:id",
+  authenticateToken,
+  requireAdmin,
+  updateContributorQuestion,
+);
+router.delete(
+  "/admin/assessment/questions/:id",
+  authenticateToken,
+  requireAdmin,
+  deleteContributorQuestion,
+);
 
-router.get("/admin/skill-requests", authenticateToken, requireAdmin, getSkillRequests);
-router.put("/admin/skill-requests/:id/approve", authenticateToken, requireAdmin, approveSkillRequest);
-router.put("/admin/skill-requests/:id/reject", authenticateToken, requireAdmin, rejectSkillRequest);
+router.get(
+  "/admin/skill-requests",
+  authenticateToken,
+  requireAdmin,
+  getSkillRequests,
+);
+router.put(
+  "/admin/skill-requests/:id/approve",
+  authenticateToken,
+  requireAdmin,
+  approveSkillRequest,
+);
+router.put(
+  "/admin/skill-requests/:id/reject",
+  authenticateToken,
+  requireAdmin,
+  rejectSkillRequest,
+);
 
+console.log(
+  "🔥 BULK ROUTE DEFINITIONS:",
+  router.stack
+    .filter((layer: any) => layer.route)
+    .map((layer: any) => ({
+      path: layer.route.path,
+      methods: Object.keys(layer.route.methods),
+    })),
+);
 export default router;
